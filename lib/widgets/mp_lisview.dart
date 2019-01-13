@@ -21,25 +21,7 @@ class MPListView extends StatelessWidget {
         var artFile =
             s.albumArt == null ? null : new File.fromUri(Uri.parse(s.albumArt));
 
-        /*return new ListTile(
-          dense: false,
-          leading: new Hero(
-            child: avatar(artFile, s.title, color),
-            tag: s.title,
-          ),
-          title: new Text(s.title),
-          subtitle: new Text(
-            "By ${s.artist}",
-            style: Theme.of(context).textTheme.caption,
-          ),
-          onTap: () {
-            songData.setCurrentIndex(index);
-            Navigator.push(
-                context,
-                new MaterialPageRoute(
-                    builder: (context) => new NowPlaying(songData, s)));
-          },
-        );*/
+
 
         return new ListData(
             OnTap:() {
@@ -52,7 +34,7 @@ class MPListView extends StatelessWidget {
             margin: EdgeInsets.all(4.0),
             width: screenSize.width,
             title: s.title,
-            isPlaying : songData.currentIndex!=-1 ? s.id == songData.songs[songData.currentIndex].id : false,
+            isPlaying : songData.currentIndex!=-1 && s.id == songData.songs[songData.currentIndex].id ?  songData.playerState : null,
             subtitle: "By ${s.artist}",
             image: artFile!=null ? DecorationImage(image:  new FileImage(artFile) ,
                 fit: BoxFit.cover): null,

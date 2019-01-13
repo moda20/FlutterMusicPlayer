@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:ui';
-
+import '../data/PlayerStateEnum.dart';
 class ListData extends StatefulWidget {
   @override
   State<StatefulWidget> createState() => ListDataState();
@@ -11,7 +11,7 @@ class ListData extends StatefulWidget {
   final String subtitle;
   final DecorationImage image;
   final VoidCallback OnTap;
-  bool isPlaying;
+  PlayerState isPlaying;
   final MaterialColor color;
 
   ListData(
@@ -34,13 +34,13 @@ class ListDataState extends State<ListData> {
   String subtitle;
   DecorationImage image;
   VoidCallback OnTap;
-  bool isPlaying;
+  PlayerState isPlaying;
   MaterialColor color;
 
   void _OnItemTap() {
     setState(() {
-      if (this.isPlaying == false) {
-        this.isPlaying = true;
+      if (this.isPlaying == PlayerState.stopped || this.isPlaying == PlayerState.paused) {
+        this.isPlaying = PlayerState.playing;
       }
       widget.OnTap();
     });
@@ -79,7 +79,7 @@ class ListDataState extends State<ListData> {
                       height: 60.0,
                       decoration: new BoxDecoration(
                           shape: BoxShape.circle, image: widget.image),
-                      child: widget.isPlaying == true
+                      child: widget.isPlaying != null
                           ? new BackdropFilter(
                               filter: new ImageFilter.blur(
                                   sigmaX: 4.0, sigmaY: 4.0),
@@ -91,7 +91,7 @@ class ListDataState extends State<ListData> {
                                         Colors.grey.shade500.withOpacity(0.01),
                                     shape: BoxShape.circle),
                                 child: new Icon(
-                                  Icons.pause,
+                                  isPlaying==PlayerState.playing? Icons.pause:isPlaying==PlayerState.stopped? Icons.play_arrow:Icons.play_arrow,
                                   color: Colors.grey.shade500,
                                   size: 35.0,
                                 ),
@@ -105,9 +105,9 @@ class ListDataState extends State<ListData> {
                       width: 60.0,
                       height: 60.0,
                       child: new CircleAvatar(
-                        child: widget.isPlaying == true
+                        child: widget.isPlaying != null
                             ? new Icon(
-                                Icons.pause,
+                          isPlaying==PlayerState.playing? Icons.pause:isPlaying==PlayerState.stopped? Icons.play_arrow:Icons.play_arrow,
                                 color: Colors.grey.shade500,
                                 size: 35.0,
                               )

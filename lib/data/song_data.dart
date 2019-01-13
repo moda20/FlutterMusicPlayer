@@ -1,9 +1,10 @@
 import 'package:flute_music_player/flute_music_player.dart';
 import 'dart:math';
-
+import './PlayerStateEnum.dart';
 class SongData {
   List<Song> _songs;
   int _currentSongIndex = -1;
+  PlayerState playerState= PlayerState.stopped;
   MusicFinder musicFinder;
   SongData(this._songs) {
     musicFinder = new MusicFinder();

@@ -8,7 +8,7 @@ import 'package:flute_example/widgets/mp_control_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flute_music_player/flute_music_player.dart';
 
-enum PlayerState { stopped, playing, paused }
+import '../data/PlayerStateEnum.dart';
 
 class NowPlaying extends StatefulWidget {
   final Song _song;
@@ -49,7 +49,10 @@ class _NowPlayingState extends State<NowPlaying> {
   }
 
   void onComplete() {
-    setState(() => playerState = PlayerState.stopped);
+    setState(()  {
+        playerState = PlayerState.stopped ;
+        widget.songData.playerState= playerState;
+    });
     play(widget.songData.nextSong);
   }
 
@@ -88,6 +91,7 @@ class _NowPlayingState extends State<NowPlaying> {
     audioPlayer.setErrorHandler((msg) {
       setState(() {
         playerState = PlayerState.stopped;
+        widget.songData.playerState= playerState;
         duration = new Duration(seconds: 0);
         position = new Duration(seconds: 0);
       });
@@ -100,6 +104,7 @@ class _NowPlayingState extends State<NowPlaying> {
       if (result == 1)
         setState(() {
           playerState = PlayerState.playing;
+          widget.songData.playerState= playerState;
           song = s;
         });
     }
@@ -107,7 +112,10 @@ class _NowPlayingState extends State<NowPlaying> {
 
   Future pause() async {
     final result = await audioPlayer.pause();
-    if (result == 1) setState(() => playerState = PlayerState.paused);
+    if (result == 1) setState(() {
+      playerState = PlayerState.paused;
+      widget.songData.playerState = playerState;
+    });
   }
 
   Future stop() async {
@@ -115,6 +123,7 @@ class _NowPlayingState extends State<NowPlaying> {
     if (result == 1)
       setState(() {
         playerState = PlayerState.stopped;
+        widget.songData.playerState = playerState;
         position = new Duration();
       });
   }
