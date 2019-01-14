@@ -12,9 +12,9 @@ class MPListView extends StatelessWidget {
     final rootIW = MPInheritedWidget.of(context);
     SongData songData = rootIW.songData;
     Size screenSize = MediaQuery.of(context).size;
-    return new ListView.builder(
-      itemCount: songData.songs.length,
-      itemBuilder: (context, int index) {
+    return new AnimatedList(
+      initialItemCount: songData.songs.length,
+      itemBuilder: (context, int index,animation) {
 
         var s = songData.songs[index];
         final MaterialColor color = _colors[index % _colors.length];
