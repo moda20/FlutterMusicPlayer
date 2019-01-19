@@ -42,7 +42,7 @@ class _AnimatedFabState extends State<AnimatedFab> with SingleTickerProviderStat
             children: <Widget>[
               _buildExpandedBackground(),
               _buildFabCore(),
-              _buildOption(Icons.check_circle, 0.0, (){
+              _buildOption(Icons.shuffle, 0.0, (){
                 widget.onTapOne();
                 close();
               }),
