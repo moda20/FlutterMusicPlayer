@@ -55,10 +55,16 @@ class BottomNowPlayingState extends State<BottomNowPlaying> {
     Size screenSize = MediaQuery.of(context).size;
 
     return new Container(
+      decoration: BoxDecoration(
+        color: Colors.black26
+      ),
+      height: rootIW.songData != null && rootIW.songData.currentIndex != -1?60.0:0,
       child : rootIW.songData != null && rootIW.songData.currentIndex != -1
           ? new Material(
         child: new Container(
-            decoration: BoxDecoration(),
+            decoration: BoxDecoration(
+                color: Colors.white.withAlpha(6)
+            ),
             height: 60.0,
             child: _buildBottomNavigationBar(
               OnTap: () {
@@ -97,7 +103,7 @@ class BottomNowPlayingState extends State<BottomNowPlaying> {
                   : null,
               color: Colors.blue,
             )),
-        elevation: 50.0,
+        elevation: 10.0,
       )
           : null,
     );

@@ -35,7 +35,8 @@ class SongData {
 
   Map get randomSongMap {
     Random r = new Random();
-    return {"song":_songs[r.nextInt(_songs.length)],"index":r.nextInt(_songs.length) };
+    var index = r.nextInt(_songs.length);
+    return {"song":_songs[index],"index":index };
   }
 
   Song get prevSong {

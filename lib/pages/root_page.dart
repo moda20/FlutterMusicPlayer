@@ -10,6 +10,7 @@ import 'dart:async';
 import '../data/PlayerStateEnum.dart';
 import '../widgets/mp_animatedFab.dart';
 import '../widgets/mp_bottom_nowPlaying.dart';
+
 class RootPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -19,7 +20,6 @@ class RootPage extends StatelessWidget {
     final StreamController changeNotifier = new StreamController.broadcast();
     //Goto Now Playing Page
     void goToNowPlaying(Song s, {bool nowPlayTap: false}) {
-
       Navigator.push(
           context,
           new MaterialPageRoute(
@@ -35,24 +35,34 @@ class RootPage extends StatelessWidget {
     void shuffleSongs() {
       Map RandomSong = rootIW.songData.randomSongMap;
       rootIW.songData.setCurrentIndex(RandomSong["index"]);
-      goToNowPlaying(RandomSong["song"],nowPlayTap: false);
+      print("rootIndex ${rootIW.songData.currentIndex}");
+      print("Random index ${RandomSong["index"]}");
+      print(RandomSong["song"].title);
+      goToNowPlaying(RandomSong["song"], nowPlayTap: false);
     }
+
     @override
     void dispose() {
       changeNotifier.close();
     }
+
     Widget _buildIamge() {
-      return new ClipPath(
+      return new Container(
+        child: new ClipPath(
           clipper: new DialogonalClipper(),
-          child: new Image.asset(
-            'assets/bubbles.jpeg',
-            fit: BoxFit.cover,
-            height: 200.0,
-            width: screenSize.width,
-            colorBlendMode: BlendMode.srcOver,
-            color: new Color.fromARGB(120, 20, 10, 40),
-          ),
-        );
+      child: new Image.asset(
+      'assets/bubbles.jpeg',
+      fit: BoxFit.cover,
+      height: 200.0,
+      width: screenSize.width,
+      colorBlendMode: BlendMode.srcOver,
+      color: new Color.fromARGB(120, 20, 10, 40),
+      ),
+      ),
+        decoration: BoxDecoration(
+          color: Colors.white.withAlpha(9)
+        ),
+      );
 
     }
 
@@ -64,19 +74,21 @@ class RootPage extends StatelessWidget {
           title: new Text("Flutter Music Player"),
           actions: <Widget>[
             new Container(
-              height:60.0,
+              height: 60.0,
               padding: const EdgeInsets.all(20.0),
               child: new Center(
                 child: new InkWell(
-                    child: new Text("Now Playing",),
+                    child: new Text(
+                      "Now Playing",
+                    ),
                     onTap: () => goToNowPlaying(
-                      rootIW.songData.songs[
-                      (rootIW.songData.currentIndex == null ||
-                          rootIW.songData.currentIndex < 0)
-                          ? 0
-                          : rootIW.songData.currentIndex],
-                      nowPlayTap: true,
-                    )),
+                          rootIW.songData.songs[
+                              (rootIW.songData.currentIndex == null ||
+                                      rootIW.songData.currentIndex < 0)
+                                  ? 0
+                                  : rootIW.songData.currentIndex],
+                          nowPlayTap: true,
+                        )),
               ),
             )
           ],
@@ -88,12 +100,12 @@ class RootPage extends StatelessWidget {
       return new Positioned(
         top: 200 - 160.0,
         right: -30.0,
-          child: new AnimatedFab(
-            onClick: null,
-            onTapOne: (){
-              shuffleSongs();
-            },
-          ),
+        child: new AnimatedFab(
+          onClick: null,
+          onTapOne: () {
+            shuffleSongs();
+          },
+        ),
       );
     }
 
@@ -113,7 +125,7 @@ class RootPage extends StatelessWidget {
                     style: new TextStyle(fontSize: 34.0),
                   ),
                   new Text(
-                    "${rootIW.songData != null? rootIW.songData.length:0} Tracks",
+                    "${rootIW.songData != null ? rootIW.songData.length : 0} Tracks",
                     style: new TextStyle(color: Colors.grey, fontSize: 12.0),
                   ),
                 ],
@@ -122,10 +134,10 @@ class RootPage extends StatelessWidget {
           ],
         ),
       );
-
     }
+
     return new Scaffold(
-      /*appBar: new AppBar(
+        /*appBar: new AppBar(
         title: new Text("Flutter Music Player"),
         actions: <Widget>[
           new Container(
@@ -145,50 +157,76 @@ class RootPage extends StatelessWidget {
           )
         ],
       ),*/
-      // drawer: new MPDrawer(),
-      body: new ListView(
-        children: <Widget>[
-          new Stack(
-            children: <Widget>[
-              _buildIamge(),
-              _buildTopHeader(),
-              _buildFab(),
-              _buildPageheader()
-            ],
+        // drawer: new MPDrawer(),
+        body: new Container(
+          height: screenSize.height * 2,
+          child: new NestedScrollView(
+            headerSliverBuilder:
+                (BuildContext context, bool innerBoxIsScrolled) {
+              return <Widget>[
+                SliverAppBar(
+                  expandedHeight: 180,
+                  title: new Text("Flutter Music Player"),
+                  actions: <Widget>[
+                    new Center(
+
+                      child: new InkWell(
+                          child: new Text(
+                            "Now Playing",
+                          ),
+                          onTap: () => goToNowPlaying(
+                                rootIW.songData.songs[
+                                    (rootIW.songData.currentIndex == null ||
+                                            rootIW.songData.currentIndex < 0)
+                                        ? 0
+                                        : rootIW.songData.currentIndex],
+                                nowPlayTap: true,
+                              )),
+                      widthFactor: 1.3,
+                    ),
+                  ],
+                  pinned: true,
+                  flexibleSpace: new Stack(
+                    children: <Widget>[
+                      _buildIamge(),
+                      /*_buildTopHeader(),*/
+                      _buildFab(),
+                      _buildPageheader()
+                    ],
+                  ),
+                )
+              ];
+            },
+            body: new Container(
+              alignment: Alignment(0.0, 0.5),
+              height: screenSize.height - 200,
+              child: rootIW.isLoading
+                  ? new Center(child: new CircularProgressIndicator())
+                  : new ScrollConfiguration(
+                      behavior: MyBehavior(),
+                      child: new Scrollbar(child: new MPListView())),
+            ),
           ),
-          new Container(
-            alignment: Alignment(0.0, 0.5),
-            height: screenSize.height-200,
-            child: rootIW.isLoading
-                ? new Center(child: new CircularProgressIndicator())
-                : new ScrollConfiguration(behavior: MyBehavior(), child: new Scrollbar(child: new MPListView())),
-          )
-        ],
-      ),
-
-      bottomNavigationBar:
-          BottomNowPlaying(onTap: (){
-            goToNowPlaying(
-              rootIW.songData.songs[
-              (rootIW.songData.currentIndex == null ||
-                  rootIW.songData.currentIndex < 0)
-                  ? 0
-                  : rootIW.songData.currentIndex],
-              nowPlayTap: true,
-            );
-          },
-          changeState: changeNotifier.stream)
-    );
+        ),
+        bottomNavigationBar: BottomNowPlaying(
+            onTap: () {
+              goToNowPlaying(
+                rootIW.songData.songs[(rootIW.songData.currentIndex == null ||
+                        rootIW.songData.currentIndex < 0)
+                    ? 0
+                    : rootIW.songData.currentIndex],
+                nowPlayTap: true,
+              );
+            },
+            changeState: changeNotifier.stream));
   }
-
-
 }
 
 class DialogonalClipper extends CustomClipper<Path> {
   @override
   Path getClip(Size size) {
     Path path = new Path();
-    path.lineTo(0.0, size.height - 60.0 );
+    path.lineTo(0.0, size.height );
     path.lineTo(size.width, size.height);
     path.lineTo(size.width, 0.0);
     path.close();
@@ -199,7 +237,6 @@ class DialogonalClipper extends CustomClipper<Path> {
   bool shouldReclip(CustomClipper<Path> oldClipper) => true;
 }
 
-
 class MyBehavior extends ScrollBehavior {
   @override
   Widget buildViewportChrome(
@@ -207,4 +244,3 @@ class MyBehavior extends ScrollBehavior {
     return child;
   }
 }
-
