@@ -48,4 +48,11 @@ class SongData {
   }
 
   MusicFinder get audioPlayer => musicFinder;
+
+  void sort(){
+    int oldIndex = currentIndex;
+    Song oldSong = currentIndex!=-1?songs[currentIndex]:null;
+    songs.sort((a, b) => a.title.compareTo(b.title));
+    setCurrentIndex(songs.indexWhere((x) => x.id==oldSong.id));
+  }
 }

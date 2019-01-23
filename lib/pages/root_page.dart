@@ -40,6 +40,10 @@ class RootPage extends StatelessWidget {
       print(RandomSong["song"].title);
       goToNowPlaying(RandomSong["song"], nowPlayTap: false);
     }
+    //sort songs byName
+    void sortSongs(){
+      rootIW.songData.sort();
+    }
 
     @override
     void dispose() {
@@ -104,6 +108,9 @@ class RootPage extends StatelessWidget {
           onClick: null,
           onTapOne: () {
             shuffleSongs();
+          },
+          onTapTwo: () {
+            sortSongs();
           },
         ),
       );
@@ -186,6 +193,8 @@ class RootPage extends StatelessWidget {
                     ),
                   ],
                   pinned: true,
+                  snap: true,
+                  floating: true,
                   flexibleSpace: new Stack(
                     children: <Widget>[
                       _buildIamge(),
@@ -220,6 +229,8 @@ class RootPage extends StatelessWidget {
             },
             changeState: changeNotifier.stream));
   }
+
+ 
 }
 
 class DialogonalClipper extends CustomClipper<Path> {
