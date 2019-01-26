@@ -10,13 +10,13 @@ import 'dart:async';
 import '../data/PlayerStateEnum.dart';
 import '../widgets/mp_animatedFab.dart';
 import '../widgets/mp_bottom_nowPlaying.dart';
-
+import '../Services/MusicPlayerService.dart';
 class RootPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final rootIW = MPInheritedWidget.of(context);
     Size screenSize = MediaQuery.of(context).size;
-
+    MusicService PLayer = new MusicService(rootIW.songData.audioPlayer, rootIW.songData);
     final StreamController changeNotifier = new StreamController.broadcast();
     //Goto Now Playing Page
     void goToNowPlaying(Song s, {bool nowPlayTap: false}) {
@@ -33,16 +33,25 @@ class RootPage extends StatelessWidget {
 
     //Shuffle Songs and goto now playing page
     void shuffleSongs() {
-      Map RandomSong = rootIW.songData.randomSongMap;
-      rootIW.songData.setCurrentIndex(RandomSong["index"]);
-      print("rootIndex ${rootIW.songData.currentIndex}");
+      Map RandomSong = PLayer.songData.randomSongMap;
+      PLayer.songData.setCurrentIndex(RandomSong["index"]);
+      print("rootIndex ${PLayer.songData.currentIndex}");
       print("Random index ${RandomSong["index"]}");
       print(RandomSong["song"].title);
       goToNowPlaying(RandomSong["song"], nowPlayTap: false);
     }
     //sort songs byName
     void sortSongs(){
-      rootIW.songData.sort();
+      PLayer.songData.sort();
+      changeNotifier.add("sorted");
+    }
+    void sortSongsByDuration(){
+      PLayer.songData.sortByDuration();
+      changeNotifier.add("sorted");
+    }
+    void sortSongsByArtist(){
+      PLayer.songData.sortByArtist();
+      changeNotifier.add("sorted");
     }
 
     @override
@@ -86,11 +95,7 @@ class RootPage extends StatelessWidget {
                       "Now Playing",
                     ),
                     onTap: () => goToNowPlaying(
-                          rootIW.songData.songs[
-                              (rootIW.songData.currentIndex == null ||
-                                      rootIW.songData.currentIndex < 0)
-                                  ? 0
-                                  : rootIW.songData.currentIndex],
+                      PLayer.isPlayingSong,
                           nowPlayTap: true,
                         )),
               ),
@@ -112,6 +117,12 @@ class RootPage extends StatelessWidget {
           onTapTwo: () {
             sortSongs();
           },
+          onTapThree: () {
+            sortSongsByDuration();
+          },
+          onTapFour: () {
+            sortSongsByArtist();
+          },
         ),
       );
     }
@@ -132,7 +143,7 @@ class RootPage extends StatelessWidget {
                     style: new TextStyle(fontSize: 34.0),
                   ),
                   new Text(
-                    "${rootIW.songData != null ? rootIW.songData.length : 0} Tracks",
+                    "${PLayer.songData != null ? PLayer.songData.length : 0} Tracks",
                     style: new TextStyle(color: Colors.grey, fontSize: 12.0),
                   ),
                 ],
@@ -182,11 +193,7 @@ class RootPage extends StatelessWidget {
                             "Now Playing",
                           ),
                           onTap: () => goToNowPlaying(
-                                rootIW.songData.songs[
-                                    (rootIW.songData.currentIndex == null ||
-                                            rootIW.songData.currentIndex < 0)
-                                        ? 0
-                                        : rootIW.songData.currentIndex],
+                            PLayer.isPlayingSong!=null?PLayer.isPlayingSong:PLayer.songData.songs[0],
                                 nowPlayTap: true,
                               )),
                       widthFactor: 1.3,
@@ -213,17 +220,19 @@ class RootPage extends StatelessWidget {
                   ? new Center(child: new CircularProgressIndicator())
                   : new ScrollConfiguration(
                       behavior: MyBehavior(),
-                      child: new Scrollbar(child: new MPListView())),
+                      child: new Scrollbar(
+                          child: new MPListView(
+                              changeState: changeNotifier.stream,
+                              changeNotifier: changeNotifier,)
+                      )
+              ),
             ),
           ),
         ),
         bottomNavigationBar: BottomNowPlaying(
             onTap: () {
               goToNowPlaying(
-                rootIW.songData.songs[(rootIW.songData.currentIndex == null ||
-                        rootIW.songData.currentIndex < 0)
-                    ? 0
-                    : rootIW.songData.currentIndex],
+                PLayer.isPlayingSong!=null?PLayer.isPlayingSong:PLayer.songData.songs[0],
                 nowPlayTap: true,
               );
             },

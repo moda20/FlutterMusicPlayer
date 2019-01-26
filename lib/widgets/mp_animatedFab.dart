@@ -4,7 +4,9 @@ class AnimatedFab extends StatefulWidget {
   final VoidCallback onClick;
   final VoidCallback onTapOne;
   final VoidCallback onTapTwo;
-  const AnimatedFab({Key key, this.onClick, this.onTapOne, this.onTapTwo}) : super(key: key);
+  final VoidCallback onTapThree;
+  final VoidCallback onTapFour;
+  const AnimatedFab({Key key, this.onClick, this.onTapOne, this.onTapTwo,this.onTapThree, this.onTapFour}) : super(key: key);
 
   @override
   _AnimatedFabState createState() => new _AnimatedFabState();
@@ -47,12 +49,18 @@ class _AnimatedFabState extends State<AnimatedFab> with SingleTickerProviderStat
                 widget.onTapOne();
                 close();
               }),
-              _buildOption(Icons.flash_on, -math.pi / 3,(){
+              _buildOption(Icons.sort_by_alpha, -math.pi / 3,(){
                 widget.onTapTwo();
                 close();
               }),
-              _buildOption(Icons.access_time, -2 * math.pi / 3,null),
-              _buildOption(Icons.error_outline, math.pi,null),
+              _buildOption(Icons.access_time, -2 * math.pi / 3,(){
+                widget.onTapThree();
+                close();
+              }),
+              _buildOption(Icons.perm_identity, math.pi,(){
+                widget.onTapFour();
+                close();
+              }),
             ],
           );
         },

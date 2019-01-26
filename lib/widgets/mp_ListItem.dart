@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'dart:ui';
 import '../data/PlayerStateEnum.dart';
+
+
 class ListData extends StatefulWidget {
   @override
   State<StatefulWidget> createState() => ListDataState();
@@ -13,6 +15,7 @@ class ListData extends StatefulWidget {
   final VoidCallback OnTap;
   PlayerState isPlaying;
   final MaterialColor color;
+  final VoidCallback ActiveCallback;
 
   ListData(
       {this.margin,
@@ -22,9 +25,9 @@ class ListData extends StatefulWidget {
       this.color,
       this.image,
       this.OnTap,
-      this.isPlaying});
-
-
+      this.isPlaying,
+      this.ActiveCallback}
+      );
 }
 
 class ListDataState extends State<ListData> {
@@ -56,7 +59,8 @@ class ListDataState extends State<ListData> {
     this.OnTap = widget.OnTap;
     this.isPlaying = widget.isPlaying;
     this.color = widget.color;
-    return (new GestureDetector(
+    return (new InkWell(
+
         onTap: () {
           _OnItemTap();
         },
@@ -71,53 +75,59 @@ class ListDataState extends State<ListData> {
           child: new Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              widget.image != null
-                  ? new Container(
-                      margin: new EdgeInsets.only(
-                          left: 20.0, top: 10.0, bottom: 10.0, right: 20.0),
-                      width: 60.0,
-                      height: 60.0,
-                      decoration: new BoxDecoration(
-                          shape: BoxShape.circle, image: widget.image),
-                      child: widget.isPlaying != null
-                          ? new BackdropFilter(
-                              filter: new ImageFilter.blur(
-                                  sigmaX: 4.0, sigmaY: 4.0),
-                              child: new Container(
-                                height: 60.0,
-                                width: 60.0,
-                                decoration: new BoxDecoration(
-                                    color:
-                                        Colors.grey.shade500.withOpacity(0.01),
-                                    shape: BoxShape.circle),
-                                child: new Icon(
-                                  isPlaying==PlayerState.playing? Icons.pause:isPlaying==PlayerState.stopped? Icons.play_arrow:Icons.play_arrow,
-                                  color: Colors.grey.shade500,
-                                  size: 35.0,
-                                ),
-                                alignment: Alignment(0.0, 0.0),
-                              ),
-                            )
-                          : new Container())
-                  : new Container(
-                      margin: new EdgeInsets.only(
-                          left: 20.0, top: 10.0, bottom: 10.0, right: 20.0),
-                      width: 60.0,
-                      height: 60.0,
-                      child: new CircleAvatar(
-                        child: widget.isPlaying != null
-                            ? new Icon(
+              new InkWell(
+                radius: 80.0,
+                child: widget.image != null
+                    ? new Container(
+                    margin: new EdgeInsets.only(
+                        left: 20.0, top: 10.0, bottom: 10.0, right: 20.0),
+                    width: 60.0,
+                    height: 60.0,
+                    decoration: new BoxDecoration(
+                        shape: BoxShape.circle, image: widget.image),
+                    child: widget.isPlaying != null
+                        ? new BackdropFilter(
+                      filter: new ImageFilter.blur(
+                          sigmaX: 4.0, sigmaY: 4.0),
+                      child: new Container(
+                        height: 60.0,
+                        width: 60.0,
+                        decoration: new BoxDecoration(
+                            color:
+                            Colors.grey.shade500.withOpacity(0.01),
+                            shape: BoxShape.circle),
+                        child: new Icon(
                           isPlaying==PlayerState.playing? Icons.pause:isPlaying==PlayerState.stopped? Icons.play_arrow:Icons.play_arrow,
-                                color: Colors.grey.shade500,
-                                size: 35.0,
-                              )
-                            : new Icon(
-                                Icons.music_note,
-                                color: Colors.white,
-                              ),
-                        backgroundColor: widget.color,
+                          color: Colors.grey.shade500,
+                          size: 35.0,
+                        ),
+                        alignment: Alignment(0.0, 0.0),
                       ),
+                    )
+                        : new Container())
+                    : new Container(
+                  margin: new EdgeInsets.only(
+                      left: 20.0, top: 10.0, bottom: 10.0, right: 20.0),
+                  width: 60.0,
+                  height: 60.0,
+                  child: new CircleAvatar(
+                    child: widget.isPlaying != null
+                        ? new Icon(
+                      isPlaying==PlayerState.playing? Icons.pause:isPlaying==PlayerState.stopped? Icons.play_arrow:Icons.play_arrow,
+                      color: Colors.grey.shade500,
+                      size: 35.0,
+                    )
+                        : new Icon(
+                      Icons.music_note,
+                      color: Colors.white,
                     ),
+                    backgroundColor: widget.color,
+                  ),
+                ),
+                onTap: (){
+                  widget.ActiveCallback();
+                },
+              ),
               new Expanded(
                   child: new Column(
                 crossAxisAlignment: CrossAxisAlignment.start,

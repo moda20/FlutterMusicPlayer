@@ -5,6 +5,7 @@ import 'dart:async';
 import 'package:flute_example/widgets/mp_inherited.dart';
 import '../data/PlayerStateEnum.dart';
 import '../pages/root_page.dart';
+import '../Services/MusicPlayerService.dart';
 class BottomNowPlaying extends StatefulWidget {
 
   @override
@@ -29,8 +30,9 @@ class BottomNowPlayingState extends State<BottomNowPlaying> {
   }
 
   void changeState(){
+    print("bottom playing now bar, state changed");
     setState((){
-      print("STTTTTTTTaete");
+      print("bottom playing now bar, state changed");
     });
 
   }
@@ -53,13 +55,13 @@ class BottomNowPlayingState extends State<BottomNowPlaying> {
   Widget build(BuildContext context) {
     final rootIW = MPInheritedWidget.of(context);
     Size screenSize = MediaQuery.of(context).size;
-
-    return new Container(
+    MusicService PLayer = rootIW.songData!=null? new MusicService(rootIW.songData.audioPlayer, rootIW.songData):null;
+    return PLayer !=null? new Container(
       decoration: BoxDecoration(
         color: Colors.black26
       ),
-      height: rootIW.songData != null && rootIW.songData.currentIndex != -1?60.0:0,
-      child : rootIW.songData != null && rootIW.songData.currentIndex != -1
+      height: PLayer.songData != null && PLayer.songData.currentIndex != -1?60.0:0,
+      child : PLayer.songData != null && PLayer.songData.currentIndex != -1
           ? new Material(
         child: new Container(
             decoration: BoxDecoration(
@@ -81,32 +83,23 @@ class BottomNowPlayingState extends State<BottomNowPlaying> {
               },
               margin: EdgeInsets.all(1.0),
               width: screenSize.width,
-              title: rootIW
-                  .songData.songs[rootIW.songData.currentIndex].title,
-              isPlaying: rootIW.songData.currentIndex != -1
-                  ? rootIW.songData.playerState
+              title: PLayer.isPlayingSong.title,
+              isPlaying: PLayer.songData.currentIndex != -1
+                  ? PLayer.Status
                   : null,
               subtitle:
-              "By ${rootIW.songData.songs[rootIW.songData.currentIndex].artist}",
-              image: rootIW
-                  .songData
-                  .songs[rootIW.songData.currentIndex]
-                  .albumArt !=
-                  null
-                  ? DecorationImage(
+              "By ${PLayer.isPlayingSong.artist}",
+              image: PLayer.isPlayingSong.albumArt != null ? DecorationImage(
                   image: new FileImage(new File.fromUri(Uri.parse(
-                      rootIW
-                          .songData
-                          .songs[rootIW.songData.currentIndex]
-                          .albumArt))),
+                      PLayer.isPlayingSong.albumArt))),
                   fit: BoxFit.cover)
                   : null,
               color: Colors.blue,
             )),
-        elevation: 10.0,
+        elevation: 20.0,
       )
           : null,
-    );
+    ): new Container();
   }
 
 
@@ -129,60 +122,65 @@ class BottomNowPlayingState extends State<BottomNowPlaying> {
           child: new Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              image != null
-                  ? new Container(
+              new GestureDetector(
+                child: image != null
+                    ? new Container(
+                    margin: new EdgeInsets.only(
+                        left: 10.0, top: 5.0, bottom: 5.0, right: 10.0),
+                    width: 50.0,
+                    height: 50.0,
+                    decoration: new BoxDecoration(
+                        shape: BoxShape.circle, image: image),
+                    child: isPlaying != null
+                        ? new BackdropFilter(
+                      filter: new ImageFilter.blur(
+                          sigmaX: 4.0, sigmaY: 4.0),
+                      child: new Container(
+                        height: 50.0,
+                        width: 50.0,
+                        decoration: new BoxDecoration(
+                            color:
+                            Colors.grey.shade500.withOpacity(0.01),
+                            shape: BoxShape.circle),
+                        child: new Icon(
+                          isPlaying == PlayerState.playing
+                              ? Icons.pause
+                              : isPlaying == PlayerState.stopped
+                              ? Icons.play_arrow
+                              : Icons.play_arrow,
+                          color: Colors.grey.shade500,
+                          size: 35.0,
+                        ),
+                        alignment: Alignment(0.0, 0.0),
+                      ),
+                    )
+                        : new Container())
+                    : new Container(
                   margin: new EdgeInsets.only(
                       left: 10.0, top: 5.0, bottom: 5.0, right: 10.0),
                   width: 50.0,
                   height: 50.0,
-                  decoration: new BoxDecoration(
-                      shape: BoxShape.circle, image: image),
-                  child: isPlaying != null
-                      ? new BackdropFilter(
-                    filter: new ImageFilter.blur(
-                        sigmaX: 4.0, sigmaY: 4.0),
-                    child: new Container(
-                      height: 50.0,
-                      width: 50.0,
-                      decoration: new BoxDecoration(
-                          color:
-                          Colors.grey.shade500.withOpacity(0.01),
-                          shape: BoxShape.circle),
-                      child: new Icon(
-                        isPlaying == PlayerState.playing
-                            ? Icons.pause
-                            : isPlaying == PlayerState.stopped
-                            ? Icons.play_arrow
-                            : Icons.play_arrow,
-                        color: Colors.grey.shade500,
-                        size: 35.0,
-                      ),
-                      alignment: Alignment(0.0, 0.0),
+                  child: new CircleAvatar(
+                    child: isPlaying != null
+                        ? new Icon(
+                      isPlaying == PlayerState.playing
+                          ? Icons.pause
+                          : isPlaying == PlayerState.stopped
+                          ? Icons.play_arrow
+                          : Icons.play_arrow,
+                      color: Colors.grey.shade500,
+                      size: 35.0,
+                    )
+                        : new Icon(
+                      Icons.music_note,
+                      color: Colors.white,
                     ),
-                  )
-                      : new Container())
-                  : new Container(
-                margin: new EdgeInsets.only(
-                    left: 10.0, top: 5.0, bottom: 5.0, right: 10.0),
-                width: 50.0,
-                height: 50.0,
-                child: new CircleAvatar(
-                  child: isPlaying != null
-                      ? new Icon(
-                    isPlaying == PlayerState.playing
-                        ? Icons.pause
-                        : isPlaying == PlayerState.stopped
-                        ? Icons.play_arrow
-                        : Icons.play_arrow,
-                    color: Colors.grey.shade500,
-                    size: 35.0,
-                  )
-                      : new Icon(
-                    Icons.music_note,
-                    color: Colors.white,
+                    backgroundColor: color,
                   ),
-                  backgroundColor: color,
                 ),
+                onTap: (){
+
+                },
               ),
               new Expanded(
                   child: new Column(
