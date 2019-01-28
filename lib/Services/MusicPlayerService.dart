@@ -17,28 +17,81 @@ class MusicService {
   VoidCallback completionHandler;
   ErrorHandler errorHandler;
   StreamController changeNotifier ;
+  bool overwriteHandlers = false;
 
   void setDurationHandler(TimeChangeHandler handler) {
+
     durationHandler = handler;
+
+    if(this.overwriteHandlers ==true){
+      print("current duration handler == ${this.MusicPlayer.durationHandler} / our handler == ${durationHandler!=null}");
+      if( durationHandler !=null){
+        this.MusicPlayer.setDurationHandler((p){
+          print("setting our duration handler");
+
+            durationHandler(p);
+
+
+        });
+      }else{
+        print("not going to duration handler");
+      }
+    }
   }
 
   void setPositionHandler(TimeChangeHandler handler) {
     positionHandler = handler;
+    if(this.overwriteHandlers ==true){
+
+      print("current position handler == ${this.MusicPlayer.positionHandler} / our handler == ${positionHandler!=null}");
+
+      if( positionHandler != null) {
+        this.MusicPlayer.setPositionHandler((p) {
+          /*print("position from service  ${positionHandler}");*/
+
+          if (positionHandler != null) {
+            positionHandler(p);
+          }
+        });
+      }else{
+        print("not going to position handler");
+      }
+    }
   }
 
   void setOnCompleteHandler(VoidCallback handler){
+
+
     completionHandler = handler;
+    print("current complete handler == ${this.MusicPlayer.completionHandler} / our handler == ${completionHandler!=null}");
+    if(this.overwriteHandlers ==true){
+      this.MusicPlayer.setCompletionHandler(() {
+        this.songData.changeNotifier.add("EndedSong");
+        handler();
+      });
+    }
   }
 
   void setOnStartHandler(TimeChangeHandler handler){
     startHandler = handler;
+    /*if(this.overwriteHandlers ==true){
+      SetHandlers();
+    }*/
   }
 
   void etOnErrorHandler(ErrorHandler handler){
     errorHandler = handler;
+    if(this.overwriteHandlers ==true){
+      this.MusicPlayer.setErrorHandler((msg) {
+        this.songData.changeNotifier.addError(msg);
+        Status = PlayerState.stopped;
+        /*durationHandler = new Duration(seconds: 0);
+      positionHandler = new Duration(seconds: 0);*/
+      });
+    }
   }
 
-  MusicService(MusicPlayer,songData){
+  MusicService(MusicPlayer,songData,{overwriteHandlers=false}){
 
     this.songData = songData;
     this.MusicPlayer=this.songData.audioPlayer;
@@ -49,50 +102,17 @@ class MusicService {
     if(songData!=null){
       changeNotifier = this.songData.changeNotifier;
     }
+    this.overwriteHandlers=overwriteHandlers;
+    /*this.MusicPlayer.setCompletionHandler((){
+      stop().then((data){
+        next().then((data){
+          this.songData.changeNotifier.add("EndedSong");
+        });
+      });
 
-    this.MusicPlayer.setDurationHandler((p){
-      print("duration from service  ${p}");
-        if(durationHandler != null){
-          durationHandler(p);
-        }
-    });
-
-    this.MusicPlayer.setPositionHandler((p){
-
-        if(positionHandler != null){
-          print("position from service  ${p}");
-          positionHandler(p);
-        }
-    });
-
-    this.MusicPlayer.setCompletionHandler(completionHandler);
-
-    /*void setStartHandler(VoidCallback callback) {
-      startHandler = callback;
-    }
-
-    void setCompletionHandler(VoidCallback callback) {
-      completionHandler = callback;
-    }
-
-    void setErrorHandler(ErrorHandler handler) {
-      errorHandler = handler;
-    }*/
-
-
-
-
-    /*this.MusicPlayer.setCompletionHandler(() {
-      this.songData.changeNotifier.add("EndedSong");
-      currentPosition = currentDuration;
-    });
-
-    this.MusicPlayer.setErrorHandler((msg) {
-      this.songData.changeNotifier.addError(msg);
-      Status = PlayerState.stopped;
-      currentDuration = new Duration(seconds: 0);
-      currentPosition = new Duration(seconds: 0);
     });*/
+
+
   }
 
 
@@ -166,6 +186,7 @@ class MusicService {
       isMuted=muted;
     }
   }
+
 
 
 }

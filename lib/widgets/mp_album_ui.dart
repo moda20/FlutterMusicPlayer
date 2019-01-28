@@ -72,11 +72,11 @@ class AlbumUIState extends State<AlbumUI> with SingleTickerProviderStateMixin {
             child: new Material(
               borderRadius: new BorderRadius.circular(5.0),
               child: new Stack(children: [
-                /*new LinearProgressIndicator(
+                new LinearProgressIndicator(
                     value: 1.0,
                     valueColor: new AlwaysStoppedAnimation(
                         Theme.of(context).buttonColor)),
-                new LinearProgressIndicator(
+                /*new LinearProgressIndicator(
                   value: widget.position != null &&
                           widget.position.inMilliseconds > 0
                       ? (widget.position?.inMilliseconds?.toDouble() ?? 0.0) /

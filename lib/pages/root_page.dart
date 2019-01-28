@@ -11,12 +11,14 @@ import '../data/PlayerStateEnum.dart';
 import '../widgets/mp_animatedFab.dart';
 import '../widgets/mp_bottom_nowPlaying.dart';
 import '../Services/MusicPlayerService.dart';
+
 class RootPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final rootIW = MPInheritedWidget.of(context);
     Size screenSize = MediaQuery.of(context).size;
-    MusicService PLayer = new MusicService(rootIW.songData.audioPlayer, rootIW.songData);
+    MusicService PLayer =
+        new MusicService(rootIW.songData.audioPlayer, rootIW.songData);
     final StreamController changeNotifier = new StreamController.broadcast();
     //Goto Now Playing Page
     void goToNowPlaying(Song s, {bool nowPlayTap: false}) {
@@ -35,21 +37,53 @@ class RootPage extends StatelessWidget {
     void shuffleSongs() {
       Map RandomSong = PLayer.songData.randomSongMap;
       PLayer.songData.setCurrentIndex(RandomSong["index"]);
+      if (PLayer.Status == PlayerState.playing && PLayer.isPlayingId != null) {
+        if (RandomSong["song"].id != PLayer.isPlayingId) {
+          print("Not the same song");
+          PLayer.stop().then((stopped) {
+            PLayer.playById(RandomSong["song"].id).then((onValue) {
+              changeNotifier.add(null);
+              goToNowPlaying(RandomSong["song"], nowPlayTap: false);
+            });
+          });
+        } else {
+          PLayer.pause().then((onValue) {
+            changeNotifier.add(null);
+          });
+        }
+      } else {
+        if (RandomSong["song"].id != PLayer.isPlayingId) {
+          print("Not the same song");
+          PLayer.stop().then((stopped) {
+            PLayer.playById(RandomSong["song"].id).then((onValue) {
+              changeNotifier.add(null);
+              goToNowPlaying(RandomSong["song"], nowPlayTap: false);
+            });
+          });
+        } else {
+          PLayer.playById(RandomSong["song"].id).then((onValue) {
+            changeNotifier.add(null);
+            goToNowPlaying(RandomSong["song"], nowPlayTap: false);
+          });
+        }
+      }
       print("rootIndex ${PLayer.songData.currentIndex}");
       print("Random index ${RandomSong["index"]}");
       print(RandomSong["song"].title);
-      goToNowPlaying(RandomSong["song"], nowPlayTap: false);
     }
+
     //sort songs byName
-    void sortSongs(){
+    void sortSongs() {
       PLayer.songData.sort();
       changeNotifier.add("sorted");
     }
-    void sortSongsByDuration(){
+
+    void sortSongsByDuration() {
       PLayer.songData.sortByDuration();
       changeNotifier.add("sorted");
     }
-    void sortSongsByArtist(){
+
+    void sortSongsByArtist() {
       PLayer.songData.sortByArtist();
       changeNotifier.add("sorted");
     }
@@ -63,20 +97,17 @@ class RootPage extends StatelessWidget {
       return new Container(
         child: new ClipPath(
           clipper: new DialogonalClipper(),
-      child: new Image.asset(
-      'assets/bubbles.jpeg',
-      fit: BoxFit.cover,
-      height: 200.0,
-      width: screenSize.width,
-      colorBlendMode: BlendMode.srcOver,
-      color: new Color.fromARGB(120, 20, 10, 40),
-      ),
-      ),
-        decoration: BoxDecoration(
-          color: Colors.white.withAlpha(9)
+          child: new Image.asset(
+            'assets/bubbles.jpeg',
+            fit: BoxFit.cover,
+            height: 200.0,
+            width: screenSize.width,
+            colorBlendMode: BlendMode.srcOver,
+            color: new Color.fromARGB(120, 20, 10, 40),
+          ),
         ),
+        decoration: BoxDecoration(color: Colors.white.withAlpha(9)),
       );
-
     }
 
     Widget _buildTopHeader() {
@@ -86,7 +117,7 @@ class RootPage extends StatelessWidget {
           backgroundColor: Colors.transparent,
           title: new Text("Flutter Music Player"),
           actions: <Widget>[
-            new Container(
+            /*new Container(
               height: 60.0,
               padding: const EdgeInsets.all(20.0),
               child: new Center(
@@ -99,7 +130,7 @@ class RootPage extends StatelessWidget {
                           nowPlayTap: true,
                         )),
               ),
-            )
+            )*/
           ],
         ),
       );
@@ -186,7 +217,7 @@ class RootPage extends StatelessWidget {
                   expandedHeight: 180,
                   title: new Text("Flutter Music Player"),
                   actions: <Widget>[
-                    new Center(
+                    /*new Center(
 
                       child: new InkWell(
                           child: new Text(
@@ -197,7 +228,7 @@ class RootPage extends StatelessWidget {
                                 nowPlayTap: true,
                               )),
                       widthFactor: 1.3,
-                    ),
+                    ),*/
                   ],
                   pinned: true,
                   snap: true,
@@ -222,31 +253,36 @@ class RootPage extends StatelessWidget {
                       behavior: MyBehavior(),
                       child: new Scrollbar(
                           child: new MPListView(
-                              changeState: changeNotifier.stream,
-                              changeNotifier: changeNotifier,)
-                      )
-              ),
+                        changeState: changeNotifier.stream,
+                        changeNotifier: changeNotifier,
+                      ))),
             ),
           ),
         ),
         bottomNavigationBar: BottomNowPlaying(
             onTap: () {
+              if (PLayer.Status == PlayerState.playing &&
+                  PLayer.isPlayingId != null) {
+                changeNotifier.add(null);
+              } else {
+                PLayer.playById(PLayer.isPlayingId).then((onValue) {
+                  changeNotifier.add(null);
+                });
+              }
               goToNowPlaying(
-                PLayer.isPlayingSong!=null?PLayer.isPlayingSong:PLayer.songData.songs[0],
-                nowPlayTap: true,
+                PLayer.isPlayingSong,
+                nowPlayTap: false,
               );
             },
             changeState: changeNotifier.stream));
   }
-
- 
 }
 
 class DialogonalClipper extends CustomClipper<Path> {
   @override
   Path getClip(Size size) {
     Path path = new Path();
-    path.lineTo(0.0, size.height );
+    path.lineTo(0.0, size.height);
     path.lineTo(size.width, size.height);
     path.lineTo(size.width, 0.0);
     path.close();

@@ -4,7 +4,7 @@ import 'dart:ui';
 import 'dart:async';
 import 'package:flute_example/widgets/mp_inherited.dart';
 import '../data/PlayerStateEnum.dart';
-import '../pages/root_page.dart';
+import './mp_marquee_text.dart';
 import '../Services/MusicPlayerService.dart';
 class BottomNowPlaying extends StatefulWidget {
 
@@ -34,9 +34,8 @@ class BottomNowPlayingState extends State<BottomNowPlaying> {
     setState((){
       print("bottom playing now bar, state changed");
     });
-
   }
- /* @override
+  @override
   didUpdateWidget(BottomNowPlaying old) {
     super.didUpdateWidget(old);
     // in case the stream instance changed, subscribe to the new one
@@ -44,11 +43,11 @@ class BottomNowPlayingState extends State<BottomNowPlaying> {
       streamSubscription.cancel();
       streamSubscription = widget.changeState.listen((_) => this.changeState());
     }
-  }*/
+  }
   @override
   dispose() {
     super.dispose();
-    /*streamSubscription.cancel();*/
+    streamSubscription.cancel();
   }
 
   @override
@@ -136,8 +135,8 @@ class BottomNowPlayingState extends State<BottomNowPlaying> {
                       filter: new ImageFilter.blur(
                           sigmaX: 4.0, sigmaY: 4.0),
                       child: new Container(
-                        height: 50.0,
-                        width: 50.0,
+                        height: 51.0,
+                        width: 51.0,
                         decoration: new BoxDecoration(
                             color:
                             Colors.grey.shade500.withOpacity(0.01),
@@ -186,14 +185,20 @@ class BottomNowPlayingState extends State<BottomNowPlaying> {
                   child: new Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
-                      new Text(title,
-                          overflow: TextOverflow.ellipsis,
-                          softWrap: true,
-                          maxLines: 1,
-                          style: new TextStyle(
-                            fontSize: 18.0,
-                            fontWeight: FontWeight.w400,
-                          )),
+                      new MarqueeWidget(
+                        child: new Text(title,
+                            overflow: TextOverflow.ellipsis,
+                            softWrap: true,
+                            maxLines: 1,
+                            style: new TextStyle(
+                              fontSize: 18.0,
+                              fontWeight: FontWeight.w400,
+                            )),
+                        direction: Axis.horizontal,
+                        animationDuration: Duration(milliseconds: title.toString().length*100),
+                        pauseDuration: Duration(milliseconds: title.toString().length*20),
+                        backDuration: Duration(milliseconds: title.toString().length*20),
+                      ),
                       new Padding(
                         padding: new EdgeInsets.only(top: 2.5),
                         child: new Text(

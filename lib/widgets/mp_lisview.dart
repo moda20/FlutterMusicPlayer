@@ -32,7 +32,7 @@ class _MPListViewState extends State<MPListView> {
 
 
   void changeState(data) {
-    print(data);
+    print("ListviewChangeState ${data}");
     if(data=="sorted"){
       setState(() {
         print("List view state changed");
@@ -58,7 +58,24 @@ class _MPListViewState extends State<MPListView> {
         s.albumArt == null ? null : new File.fromUri(Uri.parse(s.albumArt));
         return new ListData(
           OnTap:() {
-            PLayer.songData.setCurrentIndex(PLayer.songData.CurrentIndexOfSong(s));
+            if(PLayer.Status==PlayerState.playing){
+              if(s.id!=PLayer.isPlayingId){
+                PLayer.stop().then((stopped){
+                  PLayer.play(s).then((onValue){
+                    setState(() {
+                      widget.changeNotifier.add(null);
+                    });
+                  });
+                });
+              }
+            }else{
+              PLayer.play(s).then((startedPlaying){
+                setState(() {
+                  widget.changeNotifier.add(null);
+                });
+              });
+
+            }
             Navigator.push(
                 context,
                 new MaterialPageRoute(
@@ -73,21 +90,20 @@ class _MPListViewState extends State<MPListView> {
               fit: BoxFit.cover): null,
           color: color,
           ActiveCallback: (){
-            if(PLayer.Status==PlayerState.playing){
-              if(s.id!=PLayer.isPlayingId){
+            if(PLayer.Status==PlayerState.playing && PLayer.isPlayingId!=null){
+              if(s.id!=PLayer.isPlayingId ){
+                print("Not the same song");
                 PLayer.stop().then((stopped){
-                  PLayer.play(s).then((onValue){
-                    widget.changeNotifier.add(null);
+                  PLayer.playById(s.id).then((onValue){
                     setState(() {
-
+                      widget.changeNotifier.add(null);
                     });
                   });
                 });
               }else{
                 PLayer.pause().then((onValue){
-                    widget.changeNotifier.add(null);
                     setState(() {
-
+                      widget.changeNotifier.add(null);
                     });
                   });
 
@@ -95,12 +111,22 @@ class _MPListViewState extends State<MPListView> {
 
 
             }else{
-              PLayer.play(s).then((startedPlaying){
-                setState(() {
+              if(s.id!=PLayer.isPlayingId ){
+                print("Not the same song");
+                PLayer.stop().then((stopped){
+                  PLayer.playById(s.id).then((onValue){
+                    setState(() {
+                      widget.changeNotifier.add(null);
+                    });
+                  });
                 });
-                widget.changeNotifier.add(null);
-              });
-
+              }else{
+                PLayer.playById(s.id).then((onValue){
+                  setState(() {
+                    widget.changeNotifier.add(null);
+                  });
+                });
+              }
             }
           },
         );
@@ -111,48 +137,4 @@ class _MPListViewState extends State<MPListView> {
   }
 }
 
-/*
 
-class MPListView extends StatelessWidget {
-  final List<MaterialColor> _colors = Colors.primaries;
-  @override
-  Widget build(BuildContext context) {
-    final rootIW = MPInheritedWidget.of(context);
-    SongData songData = rootIW.songData;
-    Size screenSize = MediaQuery.of(context).size;
-    return new ListView.builder(
-      itemCount: songData.songs.length,
-      physics: ClampingScrollPhysics(),
-      itemBuilder: (context, int index) {
-
-        var s = songData.songs[index];
-        final MaterialColor color = _colors[index % _colors.length];
-        var artFile =
-            s.albumArt == null ? null : new File.fromUri(Uri.parse(s.albumArt));
-
-
-
-        return new ListData(
-            OnTap:() {
-              songData.setCurrentIndex(index);
-              Navigator.push(
-                  context,
-                  new MaterialPageRoute(
-                      builder: (context) => new NowPlaying(songData, s)));
-            },
-            margin: EdgeInsets.all(4.0),
-            width: screenSize.width,
-            title: s.title,
-            isPlaying : songData.currentIndex!=-1 && s.id == songData.songs[songData.currentIndex].id ?  songData.playerState : null,
-            subtitle: "By ${s.artist}",
-            image: artFile!=null ? DecorationImage(image:  new FileImage(artFile) ,
-                fit: BoxFit.cover): null,
-           color: color,
-        );
-
-
-      },
-    );
-  }
-}
-*/

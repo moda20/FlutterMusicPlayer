@@ -17,7 +17,7 @@ class NowPlaying extends StatefulWidget {
   final bool nowPlayTap;
   MusicService audioPlayer ;
   NowPlaying(this.songData, this._song, {this.nowPlayTap}){
-    this.audioPlayer = new MusicService(this.songData.audioPlayer, this.songData);
+    this.audioPlayer = new MusicService(this.songData.audioPlayer, this.songData,overwriteHandlers: true);
   }
 
   @override
@@ -36,8 +36,8 @@ class _NowPlayingState extends State<NowPlaying> {
 
 
 
-  get isPlaying => playerState == PlayerState.playing;
-  get isPaused => playerState == PlayerState.paused;
+  get isPlaying => this.audioPlayer.Status == PlayerState.playing;
+  get isPaused => this.audioPlayer.Status == PlayerState.paused;
 
   get durationText =>
       duration != null ? duration.toString().split('.').first : '';
@@ -61,33 +61,38 @@ class _NowPlayingState extends State<NowPlaying> {
   }*/
 
   void onComplete() {
-    setState(()  {
+    print("onComleteDone");
+
+    try{
+      setState(()  {
         playerState = PlayerState.stopped ;
         audioPlayer.Status = playerState;
-    });
-    audioPlayer.next().then((data){
-
-    });
+      });
+    }catch(e){
+      print(e);
+    }
+    next();
   }
 
   initPlayer() async {
-    audioPlayer = widget.audioPlayer;
+
     if (audioPlayer == null) {
-
-      /*streamSubscription = audioPlayer.changeNotifier.stream.listen((data) {
-        if(data == "EndedSong"){
-          onComplete();
-          setState(() {
-            this.position = this.duration;
-          });
-        };
-        if(data=="PositionHandler"){
-          print("PositionHandler");
-        }
-        // TODO Handle Errors here
-      });*/
+      print("setting the new player");
+      audioPlayer = widget.audioPlayer;
     }
+    streamSubscription = audioPlayer.songData.changeNotifier.stream.listen((data){
+      if(data =="EndedSong"){
+        print("EndedSong => RefreshingWidget");
+        try{
+          setState(() {
 
+          });
+        }catch(e){
+          print(e);
+        }
+      }
+
+    });
     setState(() {
       song =  audioPlayer.isPlayingSong;
       if(audioPlayer.Status != PlayerState.playing){
@@ -103,7 +108,6 @@ class _NowPlayingState extends State<NowPlaying> {
     });
 
     this.audioPlayer.setPositionHandler((p) {
-      print("player ${audioPlayer}");
       setState(() {
         print("position ${p}");
 
@@ -111,21 +115,26 @@ class _NowPlayingState extends State<NowPlaying> {
       });
     });
 
-    this.audioPlayer.MusicPlayer.setCompletionHandler(() {
+    setState(() {
+
+    });
+    this.audioPlayer.setOnCompleteHandler(() {
       onComplete();
       setState(() {
         position = duration;
       });
     });
+   /*
 
     this.audioPlayer.MusicPlayer.setErrorHandler((msg) {
+      print("Error happened");
       setState(() {
         playerState = PlayerState.stopped;
         widget.songData.playerState= playerState;
         duration = new Duration(seconds: 0);
         position = new Duration(seconds: 0);
       });
-    });
+    });*/
 
 
   }
@@ -186,6 +195,10 @@ class _NowPlayingState extends State<NowPlaying> {
   @override
   Widget build(BuildContext context) {
 
+
+/*  if(audioPlayer == null){
+      audioPlayer = widget.audioPlayer;
+    }*/
     Widget _buildPlayer() => new Container(
         padding: new EdgeInsets.all(20.0),
         child: new Column(mainAxisSize: MainAxisSize.min, children: [
@@ -215,7 +228,7 @@ class _NowPlayingState extends State<NowPlaying> {
               : new Slider(
                   value: position?.inMilliseconds?.toDouble() ?? 0,
                   onChanged: (double value) {
-                    print("double value = ${value}");
+
                     audioPlayer.MusicPlayer.seek((value / 1000).roundToDouble());
                   },
                   min: 0.0,
@@ -277,7 +290,7 @@ class _NowPlayingState extends State<NowPlaying> {
       body: new Container(
         color: Theme.of(context).backgroundColor,
         child: new Stack(
-          fit: StackFit.loose,
+          fit: StackFit.expand,
           overflow: Overflow.visible,
           children: <Widget>[blurWidget(audioPlayer.isPlayingSong), blurFilter(), playerUI],
         )
