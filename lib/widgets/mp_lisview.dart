@@ -39,6 +39,12 @@ class _MPListViewState extends State<MPListView> {
       });
     }
 
+    if(data=="EndedSong"){
+      setState(() {
+        print("List view state changed Song Ended");
+      });
+    }
+
   }
   final List<MaterialColor> _colors = Colors.primaries;
   @override
@@ -47,11 +53,11 @@ class _MPListViewState extends State<MPListView> {
     SongData songData = rootIW.songData;
     Size screenSize = MediaQuery.of(context).size;
     MusicService PLayer = new MusicService(songData.audioPlayer, songData);
+    PLayer.songData.changeNotifier.stream.listen((data)=>this.changeState(data));
     return new ListView.builder(
       itemCount: PLayer.songData.songs.length,
       physics: ClampingScrollPhysics(),
       itemBuilder: (context, int index) {
-
         var s = PLayer.songData.songs[index];
         final MaterialColor color = _colors[index % _colors.length];
         var artFile =
@@ -63,7 +69,7 @@ class _MPListViewState extends State<MPListView> {
                 PLayer.stop().then((stopped){
                   PLayer.play(s).then((onValue){
                     setState(() {
-                      widget.changeNotifier.add(null);
+                      PLayer.songData.changeNotifier.add(null);
                     });
                   });
                 });
@@ -71,7 +77,7 @@ class _MPListViewState extends State<MPListView> {
             }else{
               PLayer.play(s).then((startedPlaying){
                 setState(() {
-                  widget.changeNotifier.add(null);
+                  PLayer.songData.changeNotifier.add(null);
                 });
               });
 
@@ -96,14 +102,14 @@ class _MPListViewState extends State<MPListView> {
                 PLayer.stop().then((stopped){
                   PLayer.playById(s.id).then((onValue){
                     setState(() {
-                      widget.changeNotifier.add(null);
+                      PLayer.songData.changeNotifier.add(null);
                     });
                   });
                 });
               }else{
                 PLayer.pause().then((onValue){
                     setState(() {
-                      widget.changeNotifier.add(null);
+                      PLayer.songData.changeNotifier.add(null);
                     });
                   });
 
@@ -116,14 +122,14 @@ class _MPListViewState extends State<MPListView> {
                 PLayer.stop().then((stopped){
                   PLayer.playById(s.id).then((onValue){
                     setState(() {
-                      widget.changeNotifier.add(null);
+                      PLayer.songData.changeNotifier.add(null);
                     });
                   });
                 });
               }else{
                 PLayer.playById(s.id).then((onValue){
                   setState(() {
-                    widget.changeNotifier.add(null);
+                    PLayer.songData.changeNotifier.add(null);
                   });
                 });
               }

@@ -26,10 +26,10 @@ class BottomNowPlayingState extends State<BottomNowPlaying> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    streamSubscription = widget.changeState.listen((_) => this.changeState());
+    streamSubscription = widget.changeState.listen((_) => this.changeState(_));
   }
 
-  void changeState(){
+  void changeState(data){
     print("bottom playing now bar, state changed");
     setState((){
       print("bottom playing now bar, state changed");
@@ -41,7 +41,7 @@ class BottomNowPlayingState extends State<BottomNowPlaying> {
     // in case the stream instance changed, subscribe to the new one
     if (widget.changeState != old.changeState) {
       streamSubscription.cancel();
-      streamSubscription = widget.changeState.listen((_) => this.changeState());
+      streamSubscription = widget.changeState.listen((_) => this.changeState(_));
     }
   }
   @override
@@ -55,6 +55,7 @@ class BottomNowPlayingState extends State<BottomNowPlaying> {
     final rootIW = MPInheritedWidget.of(context);
     Size screenSize = MediaQuery.of(context).size;
     MusicService PLayer = rootIW.songData!=null? new MusicService(rootIW.songData.audioPlayer, rootIW.songData):null;
+    PLayer.songData.changeNotifier.stream.listen((data)=>this.changeState(data));
     return PLayer !=null? new Container(
       decoration: BoxDecoration(
         color: Colors.black26

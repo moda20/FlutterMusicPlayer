@@ -42,13 +42,15 @@ class RootPage extends StatelessWidget {
           print("Not the same song");
           PLayer.stop().then((stopped) {
             PLayer.playById(RandomSong["song"].id).then((onValue) {
-              changeNotifier.add(null);
+              PLayer.songData.changeNotifier.add(null);
+              PLayer.songData.changeNotifier.add("sorted");
               goToNowPlaying(RandomSong["song"], nowPlayTap: false);
             });
           });
         } else {
           PLayer.pause().then((onValue) {
-            changeNotifier.add(null);
+            PLayer.songData.changeNotifier.add(null);
+            PLayer.songData.changeNotifier.add("sorted");
           });
         }
       } else {
@@ -56,13 +58,15 @@ class RootPage extends StatelessWidget {
           print("Not the same song");
           PLayer.stop().then((stopped) {
             PLayer.playById(RandomSong["song"].id).then((onValue) {
-              changeNotifier.add(null);
+              PLayer.songData.changeNotifier.add(null);
+              PLayer.songData.changeNotifier.add("sorted");
               goToNowPlaying(RandomSong["song"], nowPlayTap: false);
             });
           });
         } else {
           PLayer.playById(RandomSong["song"].id).then((onValue) {
-            changeNotifier.add(null);
+            PLayer.songData.changeNotifier.add(null);
+            PLayer.songData.changeNotifier.add("sorted");
             goToNowPlaying(RandomSong["song"], nowPlayTap: false);
           });
         }
@@ -75,22 +79,22 @@ class RootPage extends StatelessWidget {
     //sort songs byName
     void sortSongs() {
       PLayer.songData.sort();
-      changeNotifier.add("sorted");
+      PLayer.songData.changeNotifier.add("sorted");
     }
 
     void sortSongsByDuration() {
       PLayer.songData.sortByDuration();
-      changeNotifier.add("sorted");
+      PLayer.songData.changeNotifier.add("sorted");
     }
 
     void sortSongsByArtist() {
       PLayer.songData.sortByArtist();
-      changeNotifier.add("sorted");
+      PLayer.songData.changeNotifier.add("sorted");
     }
 
     @override
     void dispose() {
-      changeNotifier.close();
+      /*changeNotifier.close();*/
     }
 
     Widget _buildIamge() {

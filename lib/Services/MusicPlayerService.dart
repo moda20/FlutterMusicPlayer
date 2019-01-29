@@ -65,6 +65,7 @@ class MusicService {
     completionHandler = handler;
     print("current complete handler == ${this.MusicPlayer.completionHandler} / our handler == ${completionHandler!=null}");
     if(this.overwriteHandlers ==true){
+      print("setting out complete handler");
       this.MusicPlayer.setCompletionHandler(() {
         this.songData.changeNotifier.add("EndedSong");
         handler();
@@ -103,14 +104,18 @@ class MusicService {
       changeNotifier = this.songData.changeNotifier;
     }
     this.overwriteHandlers=overwriteHandlers;
-    /*this.MusicPlayer.setCompletionHandler((){
-      stop().then((data){
-        next().then((data){
-          this.songData.changeNotifier.add("EndedSong");
+    if(this.overwriteHandlers!=true){
+      if(this.MusicPlayer.completionHandler==null){
+        this.MusicPlayer.setCompletionHandler((){
+          stop().then((data){
+            next().then((data){
+              print("using the automatic completition handler");
+              this.songData.changeNotifier.add("EndedSong");
+            });
+          });
         });
-      });
-
-    });*/
+      }
+    }
 
 
   }
@@ -171,13 +176,20 @@ class MusicService {
   }
 
   Future next() async {
-    stop();
-    play(this.songData.nextSong);
+    stop().then((data){
+      play(this.songData.nextSong);
+      }
+    );
+
   }
 
   Future prev() async {
-    stop();
-    play(this.songData.prevSong);
+
+    stop().then((data){
+      play(this.songData.prevSong);
+      }
+    );
+
   }
 
   Future mute(bool muted) async {

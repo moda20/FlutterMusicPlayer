@@ -54,15 +54,15 @@ class _NowPlayingState extends State<NowPlaying> {
 
   }
 
-/*  @override
+  @override
   void dispose() {
     super.dispose();
+
     print("Disposed Now Playing ${audioPlayer}");
-  }*/
+  }
 
   void onComplete() {
     print("onComleteDone");
-
     try{
       setState(()  {
         playerState = PlayerState.stopped ;
@@ -83,20 +83,19 @@ class _NowPlayingState extends State<NowPlaying> {
     streamSubscription = audioPlayer.songData.changeNotifier.stream.listen((data){
       if(data =="EndedSong"){
         print("EndedSong => RefreshingWidget");
-        try{
-          setState(() {
+        print("Old song = ${audioPlayer.isPlayingSong.title}");
+        setState(() {
 
-          });
-        }catch(e){
-          print(e);
-        }
+        });
+        print("Old song = ${audioPlayer.isPlayingSong.title}");
       }
 
     });
     setState(() {
       song =  audioPlayer.isPlayingSong;
       if(audioPlayer.Status != PlayerState.playing){
-        play(song);
+        /*play(song);*/
+        print("gonna play teh song after going to now playing");
       }
     });
 
@@ -109,8 +108,6 @@ class _NowPlayingState extends State<NowPlaying> {
 
     this.audioPlayer.setPositionHandler((p) {
       setState(() {
-        print("position ${p}");
-
         position = p;
       });
     });
@@ -285,7 +282,7 @@ class _NowPlayingState extends State<NowPlaying> {
     return new Scaffold(
       appBar: new AppBar(
         title: new Text("Now Playing"),
-        centerTitle: true,
+
       ),
       body: new Container(
         color: Theme.of(context).backgroundColor,
