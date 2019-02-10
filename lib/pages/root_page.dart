@@ -7,10 +7,13 @@ import '../widgets/mp_ListItem.dart';
 import 'dart:io';
 import 'dart:ui';
 import 'dart:async';
+import 'dart:convert';
 import '../data/PlayerStateEnum.dart';
 import '../widgets/mp_animatedFab.dart';
 import '../widgets/mp_bottom_nowPlaying.dart';
 import '../Services/MusicPlayerService.dart';
+import '../data/SongDatabase.dart';
+import '../Services/SoptifyDataService.dart';
 
 class RootPage extends StatelessWidget {
   @override
@@ -19,6 +22,18 @@ class RootPage extends StatelessWidget {
     Size screenSize = MediaQuery.of(context).size;
     MusicService PLayer =
         new MusicService(rootIW.songData.audioPlayer, rootIW.songData);
+    SongDatabase DB = new SongDatabase(rootIW.songData,new Map(),DateTime.now(),false,new Map());
+    print(DB);
+    DB.initiateOriginalToLocalDatabaseTransfer();
+    print(DB);
+    SpotifyService SPS = new SpotifyService();
+    SPS.getSpotifyArtist(SPS.clientID, SPS.clienSecret, null).then(
+        (data){
+          print(data.name);
+        }
+    );
+    String url = "https://accounts.spotify.com/authorize?client_id=${SPS.clientID}&response_type=code&redirect_uri=${SPS.redirectUrl}&scope=user-read-private%20user-read-email&state=34fFs29kd09";
+    SPS.promptUsertoLogin(url, context);
     final StreamController changeNotifier = new StreamController.broadcast();
     //Goto Now Playing Page
     void goToNowPlaying(Song s, {bool nowPlayTap: false}) {

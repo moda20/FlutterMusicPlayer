@@ -100,8 +100,8 @@ class _NowPlayingState extends State<NowPlaying> {
     });
 
     this.audioPlayer.setDurationHandler((d){
+      print(" duration ${d}");
       setState(() {
-        print(" duration ${d}");
         duration = d;
       });
     });
@@ -121,8 +121,8 @@ class _NowPlayingState extends State<NowPlaying> {
         position = duration;
       });
     });
-   /*
 
+   /*
     this.audioPlayer.MusicPlayer.setErrorHandler((msg) {
       print("Error happened");
       setState(() {

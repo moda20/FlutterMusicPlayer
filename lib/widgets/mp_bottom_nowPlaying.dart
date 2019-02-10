@@ -6,6 +6,7 @@ import 'package:flute_example/widgets/mp_inherited.dart';
 import '../data/PlayerStateEnum.dart';
 import './mp_marquee_text.dart';
 import '../Services/MusicPlayerService.dart';
+
 class BottomNowPlaying extends StatefulWidget {
 
   @override
@@ -21,7 +22,6 @@ class BottomNowPlayingState extends State<BottomNowPlaying> {
 
   StreamSubscription streamSubscription;
 
-
   @override
   void initState() {
     // TODO: implement initState
@@ -30,11 +30,11 @@ class BottomNowPlayingState extends State<BottomNowPlaying> {
   }
 
   void changeState(data){
-    print("bottom playing now bar, state changed");
     setState((){
       print("bottom playing now bar, state changed");
     });
   }
+
   @override
   didUpdateWidget(BottomNowPlaying old) {
     super.didUpdateWidget(old);
@@ -44,6 +44,7 @@ class BottomNowPlayingState extends State<BottomNowPlaying> {
       streamSubscription = widget.changeState.listen((_) => this.changeState(_));
     }
   }
+
   @override
   dispose() {
     super.dispose();
