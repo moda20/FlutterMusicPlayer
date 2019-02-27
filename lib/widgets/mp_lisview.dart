@@ -62,6 +62,7 @@ class _MPListViewState extends State<MPListView> {
         final MaterialColor color = _colors[index % _colors.length];
         var artFile =
         s.albumArt == null ? null : new File.fromUri(Uri.parse(s.albumArt));
+
         return new ListData(
           OnTap:() {
             if(PLayer.Status==PlayerState.playing){
@@ -92,7 +93,7 @@ class _MPListViewState extends State<MPListView> {
           title: s.title,
           isPlaying : PLayer.isPlayingId==s.id ?  songData.playerState : null,
           subtitle: "By ${s.artist} ${PLayer.isPlayingId==s.id}",
-          image: artFile!=null ? DecorationImage(image:  new FileImage(artFile) ,
+          image: artFile!=null ? DecorationImage(image: artFile.existsSync() ? new FileImage(artFile) : AssetImage("assets/back.jpg"),
               fit: BoxFit.cover): null,
           color: color,
           ActiveCallback: (){

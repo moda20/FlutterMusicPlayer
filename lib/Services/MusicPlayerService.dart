@@ -200,5 +200,26 @@ class MusicService {
   }
 
 
+  Map<String,Map<String,dynamic>> GetAlbums(){
+    List<Map<String,dynamic>> FinalList = new List();
+    Map<String,Map<String,dynamic>> albums = new Map();
+    for(var i =0; i < this.songData.length;i++){
+      if(albums.containsKey(this.songData.songs[i].album)){
+        albums[this.songData.songs[i].album]["songs"].add(songData.songs[i]);
+        albums[this.songData.songs[i].album]["title"] = songData.songs[i].album;
+        albums[this.songData.songs[i].album]["thumb"] = songData.songs[i].albumArt;
+        albums[this.songData.songs[i].album]["artist"] = songData.songs[i].artist;
+      }else{
+        albums[this.songData.songs[i].album] ={};
+        albums[this.songData.songs[i].album]["songs"] = [];
+        albums[this.songData.songs[i].album]["songs"].add(songData.songs[i]);
+        albums[this.songData.songs[i].album]["title"] = songData.songs[i].album;
+        albums[this.songData.songs[i].album]["thumb"] = songData.songs[i].albumArt;
+        albums[this.songData.songs[i].album]["artist"] = songData.songs[i].artist;
+      }
+
+    }
+  return albums;
+  }
 
 }

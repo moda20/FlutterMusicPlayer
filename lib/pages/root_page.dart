@@ -3,6 +3,7 @@ import 'package:flute_example/widgets/mp_inherited.dart';
 import 'package:flute_example/widgets/mp_lisview.dart';
 import 'package:flute_music_player/flute_music_player.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import '../widgets/mp_ListItem.dart';
 import 'dart:io';
 import 'dart:ui';
@@ -26,14 +27,17 @@ class RootPage extends StatelessWidget {
     print(DB);
     DB.initiateOriginalToLocalDatabaseTransfer();
     print(DB);
+
     SpotifyService SPS = new SpotifyService();
     SPS.getSpotifyArtist(SPS.clientID, SPS.clienSecret, null).then(
         (data){
           print(data.name);
         }
     );
-    String url = "https://accounts.spotify.com/authorize?client_id=${SPS.clientID}&response_type=code&redirect_uri=${SPS.redirectUrl}&scope=user-read-private%20user-read-email&state=34fFs29kd09";
-    SPS.promptUsertoLogin(url, context);
+
+    /*String url = "https://accounts.spotify.com/authorize?client_id=${SPS.clientID}&response_type=code&redirect_uri=${SPS.redirectUrl}&scope=user-read-private%20user-read-email&state=34fFs29kd09";
+    SPS.promptUsertoLogin(url, context);*/
+
     final StreamController changeNotifier = new StreamController.broadcast();
     //Goto Now Playing Page
     void goToNowPlaying(Song s, {bool nowPlayTap: false}) {
@@ -203,7 +207,121 @@ class RootPage extends StatelessWidget {
         ),
       );
     }
+    Widget buildTrendingWidget(BuildContext context,Function callback,int index, String thumb, String title, String artist)
+    {
+      Orientation orientation = MediaQuery.of(context).orientation;
+      return Card(
+        color: Colors.transparent,
+        elevation: 8.0,
+        child: new InkResponse(
+          onTap: () {
 
+          },
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(6.0),
+            child: Stack(
+              children: <Widget>[
+                Hero(
+                  tag: artist,
+                  child: thumb != null && thumb != ""
+                      ? Container(
+                    color: Colors.blueGrey.shade300,
+                    child: new Image.network(
+                      thumb,
+                      height: double.infinity,
+                      fit: BoxFit.fitHeight,
+                    ),
+                  )
+                      : new Image.asset(
+                    "assets/back.jpg",
+                    height: double.infinity,
+                    fit: BoxFit.fitHeight,
+                  ),
+                ),
+                Positioned(
+                  bottom: 0.0,
+                  child: Container(
+                    width: orientation == Orientation.portrait
+                        ? (MediaQuery.of(context).size.width - 26.0) / 2
+                        : (MediaQuery.of(context).size.width - 26.0) / 4,
+                    color: Colors.white.withOpacity(0.88),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: <Widget>[
+                        Padding(padding: EdgeInsets.symmetric(vertical: 5.0)),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 7.0, right: 7.0),
+                          child: Text(
+                            artist,
+                            style: new TextStyle(
+                                fontSize: 15.5,
+                                color: Colors.black.withOpacity(0.8),
+                                fontWeight: FontWeight.w600),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(top: 5.0),
+                          child: Padding(
+                            padding: EdgeInsets.only(left: 7.0, right: 7.0),
+                            child: Text(
+                              title,
+                              maxLines: 1,
+                              style: TextStyle(
+                                fontSize: 14.0,
+                                color: Colors.black.withOpacity(0.75),
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ),
+                        Padding(padding: EdgeInsets.symmetric(vertical: 4.0))
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+
+
+    var X = [
+      {'artist':"LMK","title":"LMK TITLE","thumb":"https://lh3.googleusercontent.com/5EfQBHDb47tchiART6U6yk3yYS9qBYr6VUssB5wHE1AgavqV5E2SSuzyiNkc7UgVng=s180"},
+    {'artist':"LMK","title":"LMK TITLE","thumb":"https://lh3.googleusercontent.com/5EfQBHDb47tchiART6U6yk3yYS9qBYr6VUssB5wHE1AgavqV5E2SSuzyiNkc7UgVng=s180"},
+    {'artist':"LMK","title":"LMK TITLE","thumb":""}
+            ];
+
+    Widget _buildArtistPage(BuildContext context,List albums){
+      Orientation orientation = MediaQuery.of(context).orientation;
+      List<Card> theList = new List();
+
+      for(var i = 0; i< albums.length; i ++){
+        theList.add(buildTrendingWidget(context,(){},0,albums[i]["thumb"],albums[i]["title"],albums[i]["artist"]));
+      }
+      return Scrollbar(
+        child: new GridView.count(
+          crossAxisCount: orientation == Orientation.portrait ? 2 : 4,
+          children: theList,
+          physics: BouncingScrollPhysics(),
+          padding: EdgeInsets.only(left: 10.0, right: 10.0),
+          childAspectRatio: 8.0 / 9.5,
+          crossAxisSpacing: 2.0,
+          mainAxisSpacing: 18.0,
+        ),
+      );
+    }
+
+
+
+
+    TabController tabController =  new TabController(length: 3,vsync: AnimatedListState());
+    var R =  PLayer.GetAlbums();
+    print(R);
     return new Scaffold(
         /*appBar: new AppBar(
         title: new Text("Flutter Music Player"),
@@ -260,21 +378,39 @@ class RootPage extends StatelessWidget {
                       _buildPageheader()
                     ],
                   ),
+                    bottom: TabBar(
+                      controller: tabController,
+                      tabs: [
+                        Tab(icon: Icon(Icons.music_note)),
+                        Tab(icon: Icon(Icons.album)),
+                        Tab(icon: Icon(Icons.directions_bike)),
+                      ],
+                    ),
                 )
               ];
             },
             body: new Container(
               alignment: Alignment(0.0, 0.5),
               height: screenSize.height - 200,
-              child: rootIW.isLoading
-                  ? new Center(child: new CircularProgressIndicator())
-                  : new ScrollConfiguration(
+              child:
+              TabBarView(
+                controller: tabController,
+                children: [
+                  rootIW.isLoading
+                      ? new Center(child: new CircularProgressIndicator())
+                      : new ScrollConfiguration(
                       behavior: MyBehavior(),
                       child: new Scrollbar(
                           child: new MPListView(
-                        changeState: changeNotifier.stream,
-                        changeNotifier: changeNotifier,
-                      ))),
+                            changeState: changeNotifier.stream,
+                            changeNotifier: changeNotifier,
+                          ))),
+                  new Container(
+                    child: _buildArtistPage(context,R.values.toList()),
+                  ),
+                  Icon(Icons.directions_bike),
+                ],
+              ),
             ),
           ),
         ),
