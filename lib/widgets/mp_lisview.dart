@@ -92,7 +92,7 @@ class _MPListViewState extends State<MPListView> {
           width: screenSize.width,
           title: s.title,
           isPlaying : PLayer.isPlayingId==s.id ?  songData.playerState : null,
-          subtitle: "By ${s.artist} ${PLayer.isPlayingId==s.id}",
+          subtitle: "By ${s.artist} ${PLayer.songData.playerState==PLayer.Status} ${PLayer.songData.playerState.toString()}",
           image: artFile!=null ? DecorationImage(image: artFile.existsSync() ? new FileImage(artFile) : AssetImage("assets/back.jpg"),
               fit: BoxFit.cover): null,
           color: color,
