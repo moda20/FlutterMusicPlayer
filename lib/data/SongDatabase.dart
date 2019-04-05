@@ -1,7 +1,9 @@
 
 import './song_data.dart';
 import 'package:flute_music_player/flute_music_player.dart' show Song;
-
+import 'package:path_provider/path_provider.dart';
+import 'dart:convert';
+import 'dart:io';
 class LocalSong{
   String name;
   String uri;
@@ -33,6 +35,14 @@ class LocalSong{
     return 'LocalSong{name: $name, uri: $uri, albumName: $albumName, albumArt: $albumArt, ArtistName: $ArtistName, LocalId: $LocalId, OriginalId: $OriginalId, duration: $duration, AlbumId: $AlbumId}';
   }
 
+ /* String toJson(){
+    return 'LocalSong{"name": $name, "uri": $uri, "albumName": $albumName, "albumArt": $albumArt, "ArtistName": $ArtistName, "LocalId": $LocalId, "OriginalId": $OriginalId, "duration": $duration, "AlbumId": $AlbumId}';
+  }*/
+
+  Map<String, dynamic> toJson() => {
+    "name": name, "uri": uri, "albumName": albumName, "albumArt": albumArt, "ArtistName": ArtistName, "LocalId": LocalId, "OriginalId": OriginalId, "duration": duration, "AlbumId": AlbumId
+  };
+
 }
 
 class LocalAlbum{
@@ -49,6 +59,19 @@ class LocalAlbum{
       totalDuration+=AlbumSongs[i].duration;
     }
   }
+
+  Map<String, dynamic> toJson(){
+    String jsonSongs ="";
+    Map newAlbum =AlbumSongs;
+    newAlbum.forEach((key,song){
+      song.toJson();
+    });
+    return {
+      "name": name, "AlbumArt": AlbumArt, "ArtistName": ArtistName, "totalDuration": totalDuration, "LocalId": LocalId, "OriginalId": OriginalId, "AlbumSongs": newAlbum
+    };
+  }
+
+
 
   AddNewSong(Map LSong){
     LocalSong newSong = LocalSong.fromMap(LSong);
@@ -98,31 +121,37 @@ class SongDatabase {
     CurrentAlbumID++;
     return CurrentAlbumID;
   }
-  SongDatabase(this.OriginalSongData,this.SongList,this.updatedAt,this.isIdenticalToLocal,this.AlbumList){
+  SongDatabase({this.OriginalSongData,this.SongList,this.updatedAt,this.isIdenticalToLocal,this.AlbumList}){
     this.updatedAt = DateTime.now();
+    this.SongList==null?this.SongList = new Map():this.SongList;
+    this.AlbumList==null?this.AlbumList = new Map():this.SongList;
   }
 
   SongDatabase.fromMap(Map m,{this.OriginalSongData = null}){
+    var it = 1;
     print(this.OriginalSongData==null?"Didn't Pass an original SongData File, will rely on localsongs data":"");
-    Map<String,LocalSong> Songs;
+    Map<String,LocalSong> Songs = new Map();
     if(m["SongList"] !=null){
-      for(var i =0; i<m["SongList"].length; i++){
-        LocalSong song = new LocalSong.fromMap(m["SongList"][i]);
+      for(var i =1; i<m["SongList"].length; i++){
+        LocalSong song = new LocalSong.fromMap(m["SongList"][i.toString()]);
         Songs[song.LocalId]=song;
+        it = i;
       }
     }
     SongList = Songs;
-    updatedAt = m["updatedAt"];
+    updatedAt = DateTime.parse(m["updatedAt"]);
     isIdenticalToLocal = m["isIdenticalToLocal"];
-    Map<String,LocalAlbum> Albums;
+    Map<String,LocalAlbum> Albums = new Map();
     if(m["AlbumList"] !=null){
-      for(var i =0; i<m["AlbumList"].length; i++){
-        LocalAlbum Album = new LocalAlbum.fromMap(m["AlbumList"][i]);
+      for(var i =1; i<m["AlbumList"].length; i++){
+        LocalAlbum Album = new LocalAlbum.fromMap(m["AlbumList"][i.toString()]);
         Albums[Album.LocalId]=Album;
       }
     }
     AlbumList =Albums;
   }
+
+
 
 
   initiateOriginalToLocalDatabaseTransfer(){
@@ -146,7 +175,9 @@ class SongDatabase {
       "duration" : ogSong.duration,
       "AlbumId" : ogSong.albumId,
       };
+
       // Check if this song exists, based on Original Id (We assume if the song exists then it was added before)
+
       var SongExists = SongExistAlready(ogSong.id);
       if(SongExists==null){
         //If the song doesn't exist
@@ -157,25 +188,29 @@ class SongDatabase {
         var AlbumExists = AlbumExistAlready(ogSong.albumId);
         if(AlbumExists==null){
           //If the album doesn't exist
-          //Create a New Map version of a Local Album
-          Map<String, dynamic> AlbumMap = {
-            "name" : ogSong.album,
-            "AlbumArt" : ogSong.albumArt,
-            "ArtistName" :ogSong.artist,
-            "totalDuration" :ogSong.duration,
-            "LocalId" : CreateNewAlbumId(),
-            "OriginalId" : ogSong.albumId,
-            "AlbumSongs" : new Map(),
-          };
+
           //Check if we already are going to add this new Album
-          if(AlbumMaps.containsKey(AlbumMap["LocalId"])){
+          //In this check we will be basing on the original Id because that one is a
+          // not generated key
+          if(AlbumMaps.containsKey(ogSong.albumId.toString())){
+
             // If we have already done so, we add this song to that album
-            AlbumMaps[AlbumMap["LocalId"]]["AlbumSongs"][SongExists]=ogSongMap;
+            AlbumMaps[ogSong.albumId.toString()]["AlbumSongs"][LNewSong.LocalId]=ogSongMap;
           }else{
+            //Create a New Map version of a Local Album
+            Map<String, dynamic> AlbumMap = {
+              "name" : ogSong.album,
+              "AlbumArt" : ogSong.albumArt,
+              "ArtistName" :ogSong.artist,
+              "totalDuration" :ogSong.duration,
+              "LocalId" : CreateNewAlbumId(),
+              "OriginalId" : ogSong.albumId,
+              "AlbumSongs" : new Map(),
+            };
             //If we didn't add this album before
             //Add The current song map to our New Map version of a Local Album
-            AlbumMap["AlbumSongs"][SongExists]=ogSongMap;
-            AlbumMaps[AlbumMap["LocalId"].toString()]=AlbumMap;
+            AlbumMap["AlbumSongs"][LNewSong.LocalId]=ogSongMap;
+            AlbumMaps[AlbumMap["OriginalId"].toString()]=AlbumMap;
           }
 
         }
@@ -208,15 +243,25 @@ class SongDatabase {
   }
 
   AlbumExistAlready(OriginalId){
-    Iterable found = AlbumList.values.where((LocalAlbum){
-      return LocalAlbum.OriginalId==OriginalId;
-    });
-    if(found.length!=0){
-      var localId = found.elementAt(0).LocalId;
-      return localId;
 
+    List<LocalAlbum> albums = AlbumList.values.toList();
+    for(var i =0; i< albums.length; i++){
+      if(albums[i].OriginalId == int.parse(OriginalId)){
+        return albums[i].LocalId;
+      }
     }
+
     return null;
+  }
+
+
+ List  toAlbumList(){
+    List<LocalAlbum> theList = new List();
+    var keys = this.AlbumList.keys;
+    for(var i=0;i<this.AlbumList.length; i++){
+      theList.add(AlbumList[keys.elementAt(i)]);
+    }
+    return theList;
   }
 
   @override
@@ -225,11 +270,57 @@ class SongDatabase {
   }
 
 
+  Map<String, dynamic> toJson() {
+    Map LabumNewList = AlbumList;
+    LabumNewList.forEach((key,album){
+      album.toJson();
+    });
+   return {
+     "SongList": SongList, "AlbumList": LabumNewList, "updatedAt": updatedAt.toString(), "isIdenticalToLocal": isIdenticalToLocal, "CurrentSongID": CurrentSongID, "CurrentAlbumID": CurrentAlbumID
+   };
+  }
+
+
   SaveDatatabse(){
+    writeCounter(json.encode(this.toJson())).then((data){
+      print('file saved ${data}');
+    });
+  }
+
+  Future<SongDatabase> ReadDatabase() async{
+
+        String string = await  readDb();
+
+        SongDatabase newDB = new SongDatabase.fromMap(json.decode(string));
+        return newDB;
 
   }
 
-  ReadDatabase(){
+  // helpers to get reading and writing to files
 
+  Future<String> get _localPath async {
+    final directory = await getApplicationDocumentsDirectory();
+
+    return directory.path;
   }
+
+  Future<File> get _localFile async {
+    final path = await _localPath;
+    return File('$path/songdb.json');
+  }
+
+  Future<File> writeCounter(String jsonString) async {
+    final file = await _localFile;
+
+    // Write the file
+    return file.writeAsString(jsonString);
+  }
+
+  Future<String> readDb() async {
+    final file = await _localFile;
+
+    // read the file
+    return await file.readAsString();
+  }
+
 }

@@ -1,4 +1,5 @@
 import 'package:flute_example/pages/now_playing.dart';
+import 'package:flute_example/pages/now_playing_alternative.dart';
 import 'package:flute_example/widgets/mp_inherited.dart';
 import 'package:flute_example/widgets/mp_lisview.dart';
 import 'package:flute_music_player/flute_music_player.dart';
@@ -11,32 +12,82 @@ import 'dart:async';
 import 'dart:convert';
 import '../data/PlayerStateEnum.dart';
 import '../widgets/mp_animatedFab.dart';
+import '../widgets/mp_songlist_swipe.dart';
 import '../widgets/mp_bottom_nowPlaying.dart';
 import '../Services/MusicPlayerService.dart';
 import '../data/SongDatabase.dart';
 import '../Services/SoptifyDataService.dart';
+import '../widgets/mp_alibum_list.dart';
+import '../utils/LifeCycleEventHandler.dart';
+import 'package:media_notification/media_notification.dart';
+import 'package:flutter/services.dart';
 
 class RootPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final rootIW = MPInheritedWidget.of(context);
     Size screenSize = MediaQuery.of(context).size;
+    if(rootIW.isLoading){
+      return new Center(
+        child: CircularProgressIndicator(strokeWidth: 3.0,value: 100,),
+      );
+    }
     MusicService PLayer =
         new MusicService(rootIW.songData.audioPlayer, rootIW.songData);
-    SongDatabase DB = new SongDatabase(rootIW.songData,new Map(),DateTime.now(),false,new Map());
-    print(DB);
+    PLayer.SetMediaHandlers();
+    SongDatabase DB = new SongDatabase(
+    AlbumList:new Map(),
+    OriginalSongData: rootIW.songData,
+    isIdenticalToLocal: false,
+    SongList: new Map(),
+    updatedAt: DateTime.now()
+    );
+ /*   print(DB);
     DB.initiateOriginalToLocalDatabaseTransfer();
     print(DB);
+    DB.SaveDatatabse();*/
 
-    SpotifyService SPS = new SpotifyService();
+
+/*    SpotifyService SPS = new SpotifyService();
     SPS.getSpotifyArtist(SPS.clientID, SPS.clienSecret, null).then(
         (data){
           print(data.name);
         }
-    );
+    );*/
+
+    Future<void> MediaNotificationState(data,MusicService PLayer) async {
+      try {
+        PLayer.songData.AppNotifier.add(data);
+      } on Exception {
+        print('''
+=============================================================
+               ${Exception}
+=============================================================
+''');
+      }
+    }
 
     /*String url = "https://accounts.spotify.com/authorize?client_id=${SPS.clientID}&response_type=code&redirect_uri=${SPS.redirectUrl}&scope=user-read-private%20user-read-email&state=34fFs29kd09";
     SPS.promptUsertoLogin(url, context);*/
+
+    PLayer.songData.AppNotifier.stream.listen((data){
+      print('''
+=============================================================
+              DATA = ${data}
+=============================================================
+''');
+      if(data=="showMedia"){
+        print('''
+=============================================================
+              MUST SHOW MEDIA
+=============================================================
+''');
+        show(PLayer.isPlayingSong!=null?PLayer.isPlayingSong.title:"", PLayer.isPlayingSong!=null?PLayer.isPlayingSong.artist:"");
+      }
+      if(data=="hideMedia"){
+        hide();
+      }
+    });
 
     final StreamController changeNotifier = new StreamController.broadcast();
     //Goto Now Playing Page
@@ -140,20 +191,6 @@ class RootPage extends StatelessWidget {
           backgroundColor: Colors.transparent,
           title: new Text("Flutter Music Player"),
           actions: <Widget>[
-            /*new Container(
-              height: 60.0,
-              padding: const EdgeInsets.all(20.0),
-              child: new Center(
-                child: new InkWell(
-                    child: new Text(
-                      "Now Playing",
-                    ),
-                    onTap: () => goToNowPlaying(
-                      PLayer.isPlayingSong,
-                          nowPlayTap: true,
-                        )),
-              ),
-            )*/
           ],
         ),
       );
@@ -233,7 +270,7 @@ class RootPage extends StatelessWidget {
                     ),
                   )
                       : new Image.asset(
-                    "assets/back.jpg",
+                    "assets/back.png",
                     height: double.infinity,
                     fit: BoxFit.fitHeight,
                   ),
@@ -290,12 +327,6 @@ class RootPage extends StatelessWidget {
 
 
 
-    var X = [
-      {'artist':"LMK","title":"LMK TITLE","thumb":"https://lh3.googleusercontent.com/5EfQBHDb47tchiART6U6yk3yYS9qBYr6VUssB5wHE1AgavqV5E2SSuzyiNkc7UgVng=s180"},
-    {'artist':"LMK","title":"LMK TITLE","thumb":"https://lh3.googleusercontent.com/5EfQBHDb47tchiART6U6yk3yYS9qBYr6VUssB5wHE1AgavqV5E2SSuzyiNkc7UgVng=s180"},
-    {'artist':"LMK","title":"LMK TITLE","thumb":""}
-            ];
-
     Widget _buildArtistPage(BuildContext context,List albums){
       Orientation orientation = MediaQuery.of(context).orientation;
       List<Card> theList = new List();
@@ -321,28 +352,9 @@ class RootPage extends StatelessWidget {
 
     TabController tabController =  new TabController(length: 3,vsync: AnimatedListState());
     var R =  PLayer.GetAlbums();
-    print(R);
+
     return new Scaffold(
-        /*appBar: new AppBar(
-        title: new Text("Flutter Music Player"),
-        actions: <Widget>[
-          new Container(
-            padding: const EdgeInsets.all(20.0),
-            child: new Center(
-              child: new InkWell(
-                  child: new Text("Now Playing"),
-                  onTap: () => goToNowPlaying(
-                        rootIW.songData.songs[
-                            (rootIW.songData.currentIndex == null ||
-                                    rootIW.songData.currentIndex < 0)
-                                ? 0
-                                : rootIW.songData.currentIndex],
-                        nowPlayTap: true,
-                      )),
-            ),
-          )
-        ],
-      ),*/
+
         // drawer: new MPDrawer(),
         body: new Container(
           height: screenSize.height * 2,
@@ -354,18 +366,7 @@ class RootPage extends StatelessWidget {
                   expandedHeight: 180,
                   title: new Text("Flutter Music Player"),
                   actions: <Widget>[
-                    /*new Center(
 
-                      child: new InkWell(
-                          child: new Text(
-                            "Now Playing",
-                          ),
-                          onTap: () => goToNowPlaying(
-                            PLayer.isPlayingSong!=null?PLayer.isPlayingSong:PLayer.songData.songs[0],
-                                nowPlayTap: true,
-                              )),
-                      widthFactor: 1.3,
-                    ),*/
                   ],
                   pinned: true,
                   snap: true,
@@ -379,6 +380,7 @@ class RootPage extends StatelessWidget {
                     ],
                   ),
                     bottom: TabBar(
+
                       controller: tabController,
                       tabs: [
                         Tab(icon: Icon(Icons.music_note)),
@@ -406,9 +408,9 @@ class RootPage extends StatelessWidget {
                             changeNotifier: changeNotifier,
                           ))),
                   new Container(
-                    child: _buildArtistPage(context,R.values.toList()),
+                    child: rootIW.songDatabase!=null?new AlbumList(rootIW.songDatabase.toAlbumList()):
+                    new CircularProgressIndicator(strokeWidth: 3.0,value: 100,) ,
                   ),
-                  Icon(Icons.directions_bike),
                 ],
               ),
             ),
@@ -429,8 +431,40 @@ class RootPage extends StatelessWidget {
                 nowPlayTap: false,
               );
             },
-            changeState: changeNotifier.stream));
+            changeState: changeNotifier.stream)
+    );
   }
+
+  Future<void> hide() async {
+    print('''
+=============================================================
+               HIDING
+=============================================================
+''');
+    try {
+
+      MediaNotification.hide();
+
+    } on PlatformException {
+
+    }
+  }
+
+  Future<void> show(title, author) async {
+    print('''
+=============================================================
+               SHOWING
+=============================================================
+''');
+    try {
+
+      MediaNotification.show(title: title, author: author);
+
+    } on PlatformException {
+
+    }
+  }
+
 }
 
 class DialogonalClipper extends CustomClipper<Path> {

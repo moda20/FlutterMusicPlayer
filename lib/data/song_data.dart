@@ -2,14 +2,40 @@ import 'package:flute_music_player/flute_music_player.dart';
 import 'dart:math';
 import 'dart:async';
 import './PlayerStateEnum.dart';
+import '../data/SongDatabase.dart';
+
 class SongData {
   List<Song> _songs;
+  SongDatabase songDatabase;
   int _currentSongIndex = -1;
   PlayerState playerState= PlayerState.stopped;
   MusicFinder musicFinder;
   final StreamController changeNotifier = new StreamController.broadcast();
-  SongData(this._songs) {
+  final StreamController AppNotifier = new StreamController.broadcast();
+  SongData(this.songDatabase,this._songs) {
+
     musicFinder = new MusicFinder();
+    if(this._songs ==null){
+      this._songs=new List();
+      var keys = this.songDatabase.SongList.keys;
+      for(var i =0; i<this.songDatabase.SongList.length; i++){
+        LocalSong elem = this.songDatabase.SongList[keys.elementAt(i)];
+
+        this._songs.add(new Song(
+            int.tryParse(elem.OriginalId),
+            elem.ArtistName,
+            elem.name,
+            elem.albumName,
+            elem.AlbumId,
+            elem.duration,
+            elem.uri,
+            elem.albumArt
+        ));
+
+      }
+    }
+    print(this._songs);
+
   }
 
   List<Song> get songs => _songs;

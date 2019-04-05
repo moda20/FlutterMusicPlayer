@@ -62,8 +62,8 @@ class BottomNowPlayingState extends State<BottomNowPlaying> {
     MusicService PLayer = rootIW.songData!=null? new MusicService(rootIW.songData.audioPlayer, rootIW.songData):null;
     PLayer.songData.changeNotifier.stream.listen((data)=>this.changeState(data));
     var initial=0.0,distance=0.0;
-    File artfile = new File.fromUri(Uri.parse(
-        PLayer.isPlayingSong.albumArt));
+    File artfile = PLayer.isPlayingSong!=null? new File.fromUri(Uri.parse(
+        PLayer.isPlayingSong.albumArt!=null?PLayer.isPlayingSong.albumArt:'')):null;
     return PLayer !=null?
     new GestureDetector(
         onPanStart: (DragStartDetails details) {
@@ -74,22 +74,24 @@ class BottomNowPlayingState extends State<BottomNowPlaying> {
         },
         onPanEnd: (DragEndDetails details) {
           initial = 0.0;
-          print(distance);
+          print("distance +++++> ${distance}");
           //+ve distance signifies a drag from left to right(start to end)
           //-ve distance signifies a drag from right to left(end to start)
-          if(distance > 80){
+          if(distance > 110.0 ){
             setState(() {
               PLayer.prev().then(
                   (data){
+                    print("JUST DID PREEEEVVVVVVv");
                     PLayer.songData.changeNotifier.add('EndedSong');
                   }
               );
             });
           }
-          if(distance < 80){
+          if(distance < 100.0 ){
             setState(() {
               PLayer.next().then(
                       (data){
+                        print("JUST DID NEEEEEEXTT");
                     PLayer.songData.changeNotifier.add('EndedSong');
                   }
               );
@@ -116,14 +118,14 @@ class BottomNowPlayingState extends State<BottomNowPlaying> {
                 PLayer: PLayer,
                 margin: EdgeInsets.all(1.0),
                 width: screenSize.width,
-                title: PLayer.isPlayingSong.title,
+                title: PLayer.isPlayingSong!=null?PLayer.isPlayingSong.title:'',
                 isPlaying: PLayer.songData.currentIndex != -1
                     ? PLayer.Status
                     : null,
                 subtitle:
                 "By ${PLayer.isPlayingSong.artist}",
                 image: PLayer.isPlayingSong.albumArt != null ? DecorationImage(
-                    image: artfile.existsSync() ? new FileImage(artfile) : AssetImage("assets/back.jpg"),
+                    image: artfile.existsSync() ? new FileImage(artfile) : AssetImage("assets/back.png"),
                     fit: BoxFit.cover)
                     : null,
                 color: Colors.blue,

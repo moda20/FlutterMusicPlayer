@@ -8,9 +8,10 @@ import 'package:flute_example/widgets/mp_control_button.dart';
 import 'package:flute_example/widgets/mp_inherited.dart';
 import 'package:flutter/material.dart';
 import 'package:flute_music_player/flute_music_player.dart';
-
+import '../widgets/mp_songlist_swipe.dart';
 import '../data/PlayerStateEnum.dart';
 import '../Services/MusicPlayerService.dart';
+import 'package:flutter/services.dart';
 class NowPlaying extends StatefulWidget {
   final Song _song;
   final SongData songData;
@@ -59,6 +60,7 @@ class _NowPlayingState extends State<NowPlaying> {
     super.dispose();
 
     print("Disposed Now Playing ${audioPlayer}");
+
   }
 
   void onComplete() {
@@ -71,7 +73,11 @@ class _NowPlayingState extends State<NowPlaying> {
     }catch(e){
       print(e);
     }
-    next();
+    next().then((data){
+      controller.animateToPage(audioPlayer.songData.currentIndex+1,
+          duration: Duration(milliseconds: 300), curve:
+          ElasticInCurve());
+    });
   }
 
   initPlayer() async {
@@ -165,20 +171,28 @@ class _NowPlayingState extends State<NowPlaying> {
   }
 
   Future next() async {
-    audioPlayer.next().then((played){
 
-      setState(() {
+      return new Future((){
+        audioPlayer.next().then((played){
 
+          setState(() {
+
+          });
       });
     });
   }
 
   Future prev() async {
-    audioPlayer.prev().then((played){
-      setState(() {
 
+      return new Future((){
+        audioPlayer.prev().then((played){
+
+          setState(() {
+
+          });
       });
     });
+
   }
 
   Future mute(bool muted) async {
@@ -188,7 +202,8 @@ class _NowPlayingState extends State<NowPlaying> {
       });
     });
   }
-
+  // Controller meant to take the reference of the carousel page controller
+  PageController controller  = null;
   @override
   Widget build(BuildContext context) {
 
@@ -196,6 +211,7 @@ class _NowPlayingState extends State<NowPlaying> {
 /*  if(audioPlayer == null){
       audioPlayer = widget.audioPlayer;
     }*/
+
     Widget _buildPlayer() => new Container(
         padding: new EdgeInsets.all(20.0),
         child: new Column(mainAxisSize: MainAxisSize.min, children: [
@@ -203,11 +219,16 @@ class _NowPlayingState extends State<NowPlaying> {
             children: <Widget>[
               new Text(
                 audioPlayer.isPlayingSong.title,
-                style: Theme.of(context).textTheme.headline,
+                style: Theme.of(context).textTheme.body1,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+
               ),
               new Text(
                 audioPlayer.isPlayingSong.artist,
                 style: Theme.of(context).textTheme.caption,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
               new Padding(
                 padding: const EdgeInsets.only(bottom: 20.0),
@@ -215,10 +236,28 @@ class _NowPlayingState extends State<NowPlaying> {
             ],
           ),
           new Row(mainAxisSize: MainAxisSize.min, children: [
-            new ControlButton(Icons.skip_previous, () => prev()),
+            new ControlButton(Icons.skip_previous, (){
+              //the - 1 is needed because the audioPlayer.songData.currentIndex doesn't get update
+              //instantly for some reason this should be investigated in a TODO
+              prev().then((data){
+                controller.animateToPage(audioPlayer.songData.currentIndex-1,
+                    duration: Duration(milliseconds: 300), curve:
+                    Curves.easeInToLinear);
+              });
+
+            }),
             new ControlButton(audioPlayer.Status==PlayerState.playing ? Icons.pause : Icons.play_arrow,
                 audioPlayer.Status==PlayerState.playing ? () => pause() : () => play(audioPlayer.isPlayingSong)),
-            new ControlButton(Icons.skip_next, () => next()),
+            new ControlButton(Icons.skip_next, (){
+              //the + 1 is needed because the audioPlayer.songData.currentIndex doesn't get update
+              //instantly for some reason this should be investigated in a TODO
+              next().then((data){
+                controller.animateToPage(audioPlayer.songData.currentIndex+1,
+                    duration: Duration(milliseconds: 300), curve:
+                    Curves.easeInToLinear);
+              });
+
+            }),
           ]),
           duration == null
               ? new Container()
@@ -272,24 +311,47 @@ class _NowPlayingState extends State<NowPlaying> {
         mainAxisAlignment: MainAxisAlignment.center,
         mainAxisSize: MainAxisSize.min,
         children: [
-          new AlbumUI(audioPlayer.isPlayingSong, duration, position),
+          new AlbumUI(audioPlayer.isPlayingSong,
+              duration,
+              position,
+              audioPlayer.songData.songs,
+              audioPlayer,
+               (int Int){
+                if(Int > audioPlayer.songData.currentIndex){
+                  next();
+                }else{
+                  if(Int < audioPlayer.songData.currentIndex){
+                    prev();
+                  }
+                }
+
+              },
+              (PageController pageController){
+                this.controller=pageController;
+              }
+          ),
           new Material(
             child: _buildPlayer(),
             color: Colors.transparent,
           ),
         ]);
 
-    return new Scaffold(
-      appBar: new AppBar(
-        title: new Text("Now Playing"),
 
-      ),
+    return new Scaffold(
+
       body: new Container(
         color: Theme.of(context).backgroundColor,
         child: new Stack(
           fit: StackFit.expand,
           overflow: Overflow.visible,
-          children: <Widget>[blurWidget(audioPlayer.isPlayingSong), blurFilter(), playerUI],
+          children: <Widget>[
+            new AppBar(
+              title: new Text("Now Playing"),
+              backgroundColor: Colors.transparent,
+            ),
+            blurWidget(audioPlayer.isPlayingSong),
+            blurFilter(),
+            playerUI],
         )
       ),
     );

@@ -1,9 +1,16 @@
 import 'dart:ui';
-
+import 'dart:io';
+import 'dart:async';
 import 'package:flute_music_player/flute_music_player.dart';
 import '../data/song_data.dart';
 import '../data/PlayerStateEnum.dart';
 import 'dart:async';
+import 'package:flutter/services.dart';
+import 'package:media_notification/media_notification.dart';
+import 'package:media_notification/media_notification.dart';
+import 'package:flutter/services.dart';
+import '../utils/LifeCycleEventHandler.dart';
+
 
 class MusicService {
   MusicFinder MusicPlayer;
@@ -117,6 +124,35 @@ class MusicService {
         });
       }
     }
+
+    //initializing the mediaNotifications
+
+    /*Future<void> MediaNotificationState(data,MusicService PLayer) async {
+      print('''
+=============================================================
+              SHOULD SEND NOW
+=============================================================
+''');
+      try {
+
+
+      } on Exception {
+        print('''
+=============================================================
+               ${Exception}
+=============================================================
+''');
+      }
+    }
+
+    this.MediaNotificationPbserver = new LifecycleEventHandler(
+        resumeCallBack:  MediaNotificationState("showMedia", this.PLayer) ,
+        suspendingCallBack: MediaNotificationState("hideMedia", this.PLayer)
+    );
+    WidgetsBinding.instance.addObserver(
+        this.MediaNotificationPbserver
+    );
+*/
   }
 
 
@@ -143,6 +179,8 @@ class MusicService {
         songData.setCurrentIndex(songData.CurrentIndexOfSong(s));
       }
     }
+
+
   }
 
   Future playById(int id) async {
@@ -222,6 +260,78 @@ class MusicService {
       }
     }
     return albums;
+  }
+
+  Future<void> hide() async {
+    try {
+      await MediaNotification.hide();
+
+    } on PlatformException {
+
+    }
+  }
+
+  Future<void> show(title, author) async {
+    try {
+      await MediaNotification.show(title: title, author: author);
+
+    } on PlatformException {
+
+    }
+  }
+
+  void SetMediaHandlers(){
+    MediaNotification.setListener('play', () {
+      if(this.isPlayingSong!=null){
+        this.play(this.isPlayingSong).then(
+                (data){
+              this.songData.changeNotifier.add(null);
+              print('played from notif');
+            }
+        );
+      }else{
+        print("Playing Song Is null will play random song");
+        this.play(this.songData.randomSong).then(
+                (data){
+              print('played from notif');
+              this.songData.changeNotifier.add(null);
+            }
+        );
+      }
+
+    });
+
+    MediaNotification.setListener('pause', () {
+      this.pause().then((data){
+        this.songData.changeNotifier.add(null);
+      });
+    });
+
+    MediaNotification.setListener('next', () {
+      this.next().then(
+              (data){
+            print('next from notif');
+            show(this.isPlayingSong.title,this.isPlayingSong.artist);
+            this.songData.changeNotifier.add(null);
+
+          }
+      );
+    });
+
+    MediaNotification.setListener('prev', () {
+      this.prev().then(
+              (data){
+            print('prev from notif');
+            show(this.isPlayingSong.title,this.isPlayingSong.artist);
+            this.songData.changeNotifier.add(null);
+
+          }
+      );
+    });
+
+    MediaNotification.setListener('select', () {
+      print("select");
+    });
   }
 }
 

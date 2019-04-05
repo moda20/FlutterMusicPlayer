@@ -8,7 +8,7 @@ Widget blurWidget(Song song) {
   return new Hero(
     tag: song.artist,
     child: new Container(
-      child: f != null
+      child: f != null && f.existsSync()
           // ignore: conflicting_dart_import
           ? new Image.file(
               f,

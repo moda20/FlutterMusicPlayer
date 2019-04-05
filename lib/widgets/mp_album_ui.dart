@@ -1,12 +1,21 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flute_music_player/flute_music_player.dart';
+import '../Services/MusicPlayerService.dart';
+import '../widgets/mp_songlist_swipe.dart';
 
 class AlbumUI extends StatefulWidget {
   final Song song;
   final Duration position;
   final Duration duration;
-  AlbumUI(this.song, this.duration, this.position);
+  final List<Song> songs;
+  final MusicService songService;
+  final dynamic OnNext;
+  final dynamic OnPrevious;
+
+  AlbumUI(this.song, this.duration, this.position, this.songs, this.songService,
+      this.OnNext, this.OnPrevious);
+
   @override
   AlbumUIState createState() {
     return new AlbumUIState();
@@ -60,37 +69,21 @@ class AlbumUIState extends State<AlbumUI> with SingleTickerProviderStateMixin {
                   gaplessPlayback: false,
                 )),
     );
-
+    double height = MediaQuery.of(context).size.height;
+    double width = MediaQuery.of(context).size.width;
     return new SizedBox.fromSize(
-      size: new Size(animation.value * 250.0, animation.value * 250.0),
+      size: new Size(width, width),
       child: new Stack(
         children: <Widget>[
-          myHero,
-          new Container(
-            alignment: Alignment.bottomCenter,
-            padding: const EdgeInsets.symmetric(horizontal: 0.8),
-            child: new Material(
-              borderRadius: new BorderRadius.circular(5.0),
-              child: new Stack(children: [
-                new LinearProgressIndicator(
-                    value: 1.0,
-                    valueColor: new AlwaysStoppedAnimation(
-                        Theme.of(context).buttonColor)),
-                /*new LinearProgressIndicator(
-                  value: widget.position != null &&
-                          widget.position.inMilliseconds > 0
-                      ? (widget.position?.inMilliseconds?.toDouble() ?? 0.0) /
-                          (widget.duration?.inMilliseconds?.toDouble() ?? 0.0)
-                      : 0.0,
-                  valueColor:
-                      new AlwaysStoppedAnimation(Theme.of(context).cardColor),
-                  backgroundColor: Theme.of(context).buttonColor,
-                ),*/
-              ]),
-            ),
-          ),
+          new mp_songlist_swipe(
+              widget.songService.songData.songs,
+              widget.songService.songData.currentIndex,
+              widget.OnNext,
+              widget.OnPrevious),
         ],
       ),
     );
   }
+
+  void OnNext() {}
 }

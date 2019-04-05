@@ -9,6 +9,9 @@ import './mp_ListItem.dart';
 import '../Services/MusicPlayerService.dart';
 import 'package:flutter/material.dart';
 import '../data/PlayerStateEnum.dart';
+import '../utils/LifeCycleEventHandler.dart';
+import 'package:media_notification/media_notification.dart';
+import 'package:flutter/services.dart';
 
 class MPListView extends StatefulWidget {
 
@@ -21,15 +24,51 @@ class MPListView extends StatefulWidget {
 
 class _MPListViewState extends State<MPListView> {
   StreamSubscription streamSubscription;
-
-
+  MusicService PLayer;
+  WidgetsBindingObserver MediaNotificationPbserver;
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     streamSubscription = widget.changeState.listen((data) => this.changeState(data));
+
+
   }
 
+  Future<void> hide() async {
+    print('''
+=============================================================
+               HIDING
+=============================================================
+''');
+    try {
+      setState(() {
+        MediaNotification.hide();
+      });
+
+    } on PlatformException {
+
+    }
+  }
+
+  Future<void> show(title, author) async {
+    print('''
+=============================================================
+               SHOWING
+=============================================================
+''');
+    try {
+      setState(() {
+
+
+        MediaNotification.show(title: title, author: author);
+
+      });
+
+    } on PlatformException {
+
+    }
+  }
 
   void changeState(data) {
     print("ListviewChangeState ${data}");
@@ -46,6 +85,9 @@ class _MPListViewState extends State<MPListView> {
     }
 
   }
+
+
+
   final List<MaterialColor> _colors = Colors.primaries;
   @override
   Widget build(BuildContext context) {
@@ -53,7 +95,15 @@ class _MPListViewState extends State<MPListView> {
     SongData songData = rootIW.songData;
     Size screenSize = MediaQuery.of(context).size;
     MusicService PLayer = new MusicService(songData.audioPlayer, songData);
+    print(this.PLayer);
+    this.PLayer = PLayer;
+    print(this.PLayer);
+    WidgetsBinding.instance.removeObserver(this.MediaNotificationPbserver);
+    PLayer.songData.AppNotifier.add("showMedia");
     PLayer.songData.changeNotifier.stream.listen((data)=>this.changeState(data));
+
+
+
     return new ListView.builder(
       itemCount: PLayer.songData.songs.length,
       physics: ClampingScrollPhysics(),
@@ -93,7 +143,7 @@ class _MPListViewState extends State<MPListView> {
           title: s.title,
           isPlaying : PLayer.isPlayingId==s.id ?  songData.playerState : null,
           subtitle: "By ${s.artist} ${PLayer.songData.playerState==PLayer.Status} ${PLayer.songData.playerState.toString()}",
-          image: artFile!=null ? DecorationImage(image: artFile.existsSync() ? new FileImage(artFile) : AssetImage("assets/back.jpg"),
+          image: artFile!=null ? DecorationImage(image: artFile.existsSync() ? new FileImage(artFile) : AssetImage("assets/back.png"),
               fit: BoxFit.cover): null,
           color: color,
           ActiveCallback: (){
