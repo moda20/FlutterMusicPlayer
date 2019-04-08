@@ -130,32 +130,12 @@ var status;
 
   @override
   Widget build(BuildContext context) {
-    InitMediaState(songData);
+
     return new MPInheritedWidget(songData, _isLoading, new RootPage(),songDatabase);
 
   }
 
-  InitMediaState(SongData Data){
 
-    if(Data==null){
-      return;
-    }
-
-
-    MediaNotification.setListener('pause', () {
-      Player.pause().then(
-          (data){
-            print('paused from notif');
-          }
-      );
-      setState(() => status = 'pause');
-
-    });
-
-
-
-
-  }
 
   Future<void> hide() async {
     print('''
@@ -164,24 +144,10 @@ var status;
 =============================================================
 ''');
     try {
-      await MediaNotification.hide();
-      setState(() => status = 'hidden');
+      Player.songData.AppNotifier.add("hideMedia");
     } on PlatformException {
 
     }
   }
 
-  Future<void> show(title, author) async {
-    print('''
-=============================================================
-               SHOWING
-=============================================================
-''');
-    try {
-      await MediaNotification.show(title: title, author: author);
-      setState(() => status = 'play');
-    } on PlatformException {
-
-    }
-  }
 }

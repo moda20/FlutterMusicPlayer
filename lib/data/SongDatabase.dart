@@ -296,6 +296,30 @@ class SongDatabase {
 
   }
 
+
+  // Rescan Library, would require an app restart
+
+
+/*  Future<void> rescanLibrary(){
+
+
+      try {
+        songs = await OriginalSongData.musicFinder.allSongs();
+        print("Parsed Songs from Storage");
+        songData = new SongData(songDatabase, songs);
+        songDatabase = new SongDatabase(
+          OriginalSongData: songData,
+        );
+        songDatabase.initiateOriginalToLocalDatabaseTransfer();
+        songDatabase.SaveDatatabse();
+      } catch (e) {
+        print(e);
+        print("Failed to get songs: '${e.message}'.");
+      }
+
+  }*/
+
+
   // helpers to get reading and writing to files
 
   Future<String> get _localPath async {
@@ -322,5 +346,7 @@ class SongDatabase {
     // read the file
     return await file.readAsString();
   }
+
+
 
 }
