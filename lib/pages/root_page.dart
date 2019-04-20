@@ -34,6 +34,9 @@ class RootPage extends StatelessWidget {
     }
     MusicService PLayer =
         new MusicService(rootIW.songData.audioPlayer, rootIW.songData);
+
+
+
     PLayer.SetMediaHandlers();
     SongDatabase DB = new SongDatabase(
     AlbumList:new Map(),

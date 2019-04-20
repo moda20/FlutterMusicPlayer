@@ -13,6 +13,75 @@ import '../utils/LifeCycleEventHandler.dart';
 
 
 class MusicService {
+
+  static  MusicService _instance = null;
+
+  /*MusicService.internal();*/
+
+  MusicService.private(MusicPlayer, songData, {overwriteHandlers = false}) {
+    this.songData = songData;
+    this.MusicPlayer = this.songData.audioPlayer;
+    this.isMuted = false;
+    this.isPlayingSong =
+    this.songData.currentIndex >= 0 ? this.songData.songs[this.songData
+        .currentIndex] : null;
+    this.isPlayingId =
+    this.isPlayingSong != null ? this.isPlayingSong.id : null;
+    this.Status = this.songData.playerState;
+    if (songData != null) {
+      changeNotifier = this.songData.changeNotifier;
+    }
+    this.overwriteHandlers = overwriteHandlers;
+    if (this.overwriteHandlers != true) {
+      if (this.MusicPlayer.completionHandler == null) {
+        this.MusicPlayer.setCompletionHandler(() {
+          stop().then((data) {
+            next().then((data) {
+              print("using the automatic completition handler");
+              this.songData.changeNotifier.add("EndedSong");
+            });
+          });
+        });
+      }
+    }
+
+    //initializing the mediaNotifications
+
+    /*Future<void> MediaNotificationState(data,MusicService PLayer) async {
+      print('''
+=============================================================
+              SHOULD SEND NOW
+=============================================================
+''');
+      try {
+
+
+      } on Exception {
+        print('''
+=============================================================
+               ${Exception}
+=============================================================
+''');
+      }
+    }
+
+    this.MediaNotificationPbserver = new LifecycleEventHandler(
+        resumeCallBack:  MediaNotificationState("showMedia", this.PLayer) ,
+        suspendingCallBack: MediaNotificationState("hideMedia", this.PLayer)
+    );
+    WidgetsBinding.instance.addObserver(
+        this.MediaNotificationPbserver
+    );
+*/
+  }
+
+  factory MusicService(MusicPlayer, songData, {overwriteHandlers = false}) {
+    if(_instance==null){
+      _instance = MusicService.private(MusicPlayer, songData, overwriteHandlers: overwriteHandlers) ;
+    }
+    return _instance;
+  }
+
   MusicFinder MusicPlayer;
   bool isMuted;
   Song isPlayingSong;
@@ -98,62 +167,7 @@ class MusicService {
     }
   }
 
-  MusicService(MusicPlayer, songData, {overwriteHandlers = false}) {
-    this.songData = songData;
-    this.MusicPlayer = this.songData.audioPlayer;
-    this.isMuted = false;
-    this.isPlayingSong =
-    this.songData.currentIndex >= 0 ? this.songData.songs[this.songData
-        .currentIndex] : null;
-    this.isPlayingId =
-    this.isPlayingSong != null ? this.isPlayingSong.id : null;
-    this.Status = this.songData.playerState;
-    if (songData != null) {
-      changeNotifier = this.songData.changeNotifier;
-    }
-    this.overwriteHandlers = overwriteHandlers;
-    if (this.overwriteHandlers != true) {
-      if (this.MusicPlayer.completionHandler == null) {
-        this.MusicPlayer.setCompletionHandler(() {
-          stop().then((data) {
-            next().then((data) {
-              print("using the automatic completition handler");
-              this.songData.changeNotifier.add("EndedSong");
-            });
-          });
-        });
-      }
-    }
 
-    //initializing the mediaNotifications
-
-    /*Future<void> MediaNotificationState(data,MusicService PLayer) async {
-      print('''
-=============================================================
-              SHOULD SEND NOW
-=============================================================
-''');
-      try {
-
-
-      } on Exception {
-        print('''
-=============================================================
-               ${Exception}
-=============================================================
-''');
-      }
-    }
-
-    this.MediaNotificationPbserver = new LifecycleEventHandler(
-        resumeCallBack:  MediaNotificationState("showMedia", this.PLayer) ,
-        suspendingCallBack: MediaNotificationState("hideMedia", this.PLayer)
-    );
-    WidgetsBinding.instance.addObserver(
-        this.MediaNotificationPbserver
-    );
-*/
-  }
 
 
   PlayerState get Status => _Status;
