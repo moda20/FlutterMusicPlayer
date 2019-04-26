@@ -81,6 +81,11 @@ class MusicService {
     }
     return _instance;
   }
+  //This can change the singleton instance on the fly
+  void RefreshInstance(MusicPlayer, songData, {overwriteHandlers = false}){
+    _instance = MusicService.private(MusicPlayer, songData, overwriteHandlers: overwriteHandlers) ;
+  }
+
 
   MusicFinder MusicPlayer;
   bool isMuted;
@@ -97,6 +102,13 @@ class MusicService {
 
   bool overwriteHandlers = false;
 
+  void setSingletonHandlers({durationHandler,positionHandler,StartHandler,CompletitionHandler}){
+    durationHandler!=null? _instance.setDurationHandler(durationHandler):null;
+    positionHandler!=null? _instance.setPositionHandler(positionHandler):null;
+    StartHandler!=null? _instance.setOnStartHandler(StartHandler):null;
+    CompletitionHandler!=null? _instance.setOnCompleteHandler(CompletitionHandler):null;
+
+  }
   void setDurationHandler(TimeChangeHandler handler) {
     durationHandler = handler;
 
@@ -250,6 +262,15 @@ class MusicService {
     }
   }
 
+  bool isFav(ogId) {
+    bool isFav =   this.songData.songDatabase.isSongFav(ogId);
+    print("isFav in mediPlayer ${isFav}");
+    return isFav;
+  }
+
+  Future<bool> toggleFav(ogId) async{
+    return  this.songData.songDatabase.toggleFav(ogId);
+  }
 
   Map<String, Map<String, dynamic>> GetAlbums() {
     List<Map<String, dynamic>> FinalList = new List();

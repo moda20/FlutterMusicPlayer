@@ -130,7 +130,6 @@ class BottomNowPlayingState extends State<BottomNowPlaying> {
                     : null,
                 color: Colors.blue,
               )),
-          elevation: 20.0,
         )
             : null,
       ),
@@ -194,8 +193,8 @@ class BottomNowPlayingState extends State<BottomNowPlaying> {
                     : new Container(
                   margin: new EdgeInsets.only(
                       left: 10.0, top: 5.0, bottom: 5.0, right: 10.0),
-                  width: 60.0,
-                  height: 60.0,
+                  width: 50.0,
+                  height: 50.0,
                   child: new CircleAvatar(
                     child: isPlaying != null
                         ? new Icon(

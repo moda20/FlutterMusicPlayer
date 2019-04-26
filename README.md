@@ -26,6 +26,7 @@ OpenSource Flutter Based Music Player with Fantastic UI
   * [x] onDuration / onCurrentPosition
   * [x] Full Player controls on bottom bar 
   * [x] swipe to change song on bottom bar / album images
+  * [] Moving the player page to the bottom slider or adding more info there (still did not decide)
 
 * Supported formats
 

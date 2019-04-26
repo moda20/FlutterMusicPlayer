@@ -21,8 +21,11 @@ import '../widgets/mp_alibum_list.dart';
 import '../utils/LifeCycleEventHandler.dart';
 import 'package:media_notification/media_notification.dart';
 import 'package:flutter/services.dart';
-
+import 'package:rubber/rubber.dart';
+import 'package:backdrop/backdrop.dart';
 class RootPage extends StatelessWidget {
+
+
   @override
   Widget build(BuildContext context) {
     final rootIW = MPInheritedWidget.of(context);
@@ -38,17 +41,6 @@ class RootPage extends StatelessWidget {
 
 
     PLayer.SetMediaHandlers();
-    SongDatabase DB = new SongDatabase(
-    AlbumList:new Map(),
-    OriginalSongData: rootIW.songData,
-    isIdenticalToLocal: false,
-    SongList: new Map(),
-    updatedAt: DateTime.now()
-    );
- /*   print(DB);
-    DB.initiateOriginalToLocalDatabaseTransfer();
-    print(DB);
-    DB.SaveDatatabse();*/
 
 
 /*    SpotifyService SPS = new SpotifyService();
@@ -88,7 +80,13 @@ class RootPage extends StatelessWidget {
         show(PLayer.isPlayingSong!=null?PLayer.isPlayingSong.title:"", PLayer.isPlayingSong!=null?PLayer.isPlayingSong.artist:"");
       }
       if(data=="hideMedia"){
+        print('''
+=============================================================
+              MUST HIDE MEDIA
+=============================================================
+''');
         hide();
+
       }
     });
 
@@ -192,7 +190,7 @@ class RootPage extends StatelessWidget {
         height: 80.0,
         child: new AppBar(
           backgroundColor: Colors.transparent,
-          title: new Text("Flutter Music Player"),
+          title: new Text("Kadi Music Player"),
           actions: <Widget>[
           ],
         ),
@@ -356,10 +354,9 @@ class RootPage extends StatelessWidget {
     TabController tabController =  new TabController(length: 3,vsync: AnimatedListState());
     var R =  PLayer.GetAlbums();
 
-    return new Scaffold(
-
-        // drawer: new MPDrawer(),
-        body: new Container(
+    return new BackdropScaffold(
+      backLayer: Center(
+        child: new Container(
           height: screenSize.height * 2,
           child: new NestedScrollView(
             headerSliverBuilder:
@@ -382,15 +379,15 @@ class RootPage extends StatelessWidget {
                       _buildPageheader()
                     ],
                   ),
-                    bottom: TabBar(
+                  bottom: TabBar(
 
-                      controller: tabController,
-                      tabs: [
-                        Tab(icon: Icon(Icons.music_note)),
-                        Tab(icon: Icon(Icons.album)),
-                        Tab(icon: Icon(Icons.directions_bike)),
-                      ],
-                    ),
+                    controller: tabController,
+                    tabs: [
+                      Tab(icon: Icon(Icons.music_note)),
+                      Tab(icon: Icon(Icons.album)),
+                      Tab(icon: Icon(Icons.directions_bike)),
+                    ],
+                  ),
                 )
               ];
             },
@@ -419,23 +416,46 @@ class RootPage extends StatelessWidget {
             ),
           ),
         ),
-        bottomNavigationBar: BottomNowPlaying(
-            onTap: () {
-              if (PLayer.Status == PlayerState.playing &&
-                  PLayer.isPlayingId != null) {
+      ),
+      headerHeight: 60.0,
+
+      frontLayer: Center(
+        child: new Text("Front Layer"),
+      ),
+      iconPosition: BackdropIconPosition.leading,
+      frontLayerBorderRadius: BorderRadius.all(Radius.circular(0.0)),
+      enableHeader: false,
+      InactiveArea: BottomNowPlaying(
+          onTap: () {
+            if (PLayer.Status == PlayerState.playing &&
+                PLayer.isPlayingId != null) {
+              changeNotifier.add(null);
+            } else {
+              PLayer.playById(PLayer.isPlayingId).then((onValue) {
                 changeNotifier.add(null);
-              } else {
-                PLayer.playById(PLayer.isPlayingId).then((onValue) {
-                  changeNotifier.add(null);
-                });
-              }
-              goToNowPlaying(
-                PLayer.isPlayingSong,
-                nowPlayTap: false,
-              );
-            },
-            changeState: changeNotifier.stream)
+              });
+            }
+            goToNowPlaying(
+              PLayer.isPlayingSong,
+              nowPlayTap: false,
+            );
+          },
+          changeState: changeNotifier.stream),
+      enableTapbacklayertohide: true,
+      enableAddingInactiveAreaToPanelWhenOpened: true,
+      frontLayerHeight: 300.0,
+      actions: <Widget>[
+        BackdropToggleButton(
+          icon: AnimatedIcons.list_view,
+        ),
+      ],
     );
+    /*return new Scaffold(
+
+        // drawer: new MPDrawer(),
+        body: ,
+        bottomNavigationBar:
+    );*/
   }
 
   Future<void> hide() async {

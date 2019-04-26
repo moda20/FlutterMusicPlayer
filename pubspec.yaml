@@ -13,6 +13,11 @@ dependencies:
   path_provider: ^0.5.0+1
   sqflite: ^1.1.0
   media_notification: ^0.0.5
+  rubber: ^0.2.7
+  backdrop:
+    git:
+      url: https://gitlab.com/MansourKadhem/backdrop.git
+      path:
 dev_dependencies:
   flutter_test:
     sdk: flutter

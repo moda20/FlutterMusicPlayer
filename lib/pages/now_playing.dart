@@ -32,7 +32,7 @@ class _NowPlayingState extends State<NowPlaying> {
   PlayerState playerState;
   Song song;
   StreamSubscription streamSubscription;
-
+  bool isFav=false;
 
 
 
@@ -75,7 +75,7 @@ class _NowPlayingState extends State<NowPlaying> {
     }
     next().then((data){
       controller.animateToPage(audioPlayer.songData.currentIndex+1,
-          duration: Duration(milliseconds: 300), curve:
+          duration: Duration(milliseconds: 200), curve:
           ElasticInCurve());
     });
   }
@@ -90,9 +90,10 @@ class _NowPlayingState extends State<NowPlaying> {
       if(data =="EndedSong"){
         print("EndedSong => RefreshingWidget");
         print("Old song = ${audioPlayer.isPlayingSong.title}");
+        mounted?
         setState(() {
 
-        });
+        }):null;
         print("Old song = ${audioPlayer.isPlayingSong.title}");
       }
 
@@ -127,6 +128,27 @@ class _NowPlayingState extends State<NowPlaying> {
         position = duration;
       });
     });
+
+    this.audioPlayer.setSingletonHandlers(
+      CompletitionHandler: () {
+        onComplete();
+        setState(() {
+          position = duration;
+        });
+      },
+      durationHandler: (d){
+        print(" duration ${d}");
+        setState(() {
+          duration = d;
+        });
+      },
+       positionHandler: (p) {
+         setState(() {
+           position = p;
+         });
+       },
+
+    );
 
    /*
     this.audioPlayer.MusicPlayer.setErrorHandler((msg) {
@@ -206,8 +228,10 @@ class _NowPlayingState extends State<NowPlaying> {
   PageController controller  = null;
   @override
   Widget build(BuildContext context) {
+    bool isFAvBool = audioPlayer.isFav(audioPlayer.isPlayingId);
 
-
+    this.isFav= isFAvBool!=null?isFAvBool:false;
+    Size screenSize = MediaQuery.of(context).size;
 /*  if(audioPlayer == null){
       audioPlayer = widget.audioPlayer;
     }*/
@@ -318,10 +342,14 @@ class _NowPlayingState extends State<NowPlaying> {
               audioPlayer,
                (int Int){
                 if(Int > audioPlayer.songData.currentIndex){
-                  next();
+                  next().then((data){
+                    this.MediaNotificationState("showMedia",this.audioPlayer);
+                  });
                 }else{
                   if(Int < audioPlayer.songData.currentIndex){
-                    prev();
+                    prev().then((data){
+                      this.MediaNotificationState("showMedia",this.audioPlayer);
+                    });
                   }
                 }
 
@@ -338,20 +366,44 @@ class _NowPlayingState extends State<NowPlaying> {
 
 
     return new Scaffold(
-
       body: new Container(
         color: Theme.of(context).backgroundColor,
         child: new Stack(
           fit: StackFit.expand,
           overflow: Overflow.visible,
           children: <Widget>[
-            new AppBar(
-              title: new Text("Now Playing"),
-              backgroundColor: Colors.transparent,
-            ),
+
             blurWidget(audioPlayer.isPlayingSong),
             blurFilter(),
-            playerUI],
+            playerUI,
+            new Positioned(
+              child: new Row(
+                children: <Widget>[
+                  new Container(
+                    child: IconButton(icon:Icon(Icons.arrow_back),
+                      onPressed:() => Navigator.pop(context, false),
+
+                    ),
+
+                  ),
+                  SizedBox(
+                    width: (screenSize.width/100)*70,
+                  ),
+                  IconButton(icon:Icon(this.isFav?Icons.favorite:Icons.favorite_border),
+                    onPressed:() => audioPlayer.toggleFav(audioPlayer.isPlayingId).then((bool){
+                      setState((){
+
+                      });
+                    }),
+                  )
+                ],
+
+              ),
+              top: 20.0,
+              height: 60.0,
+              width: screenSize.width,
+            )
+          ],
         )
       ),
     );
@@ -368,6 +420,18 @@ class _NowPlayingState extends State<NowPlaying> {
     // Fades between routes. (If you don't want any animation,
     // just return child.)
     return new FadeTransition(opacity: animation, child: child);
+  }
+
+  Future<void> MediaNotificationState(data,MusicService PLayer) async {
+    try {
+      PLayer.songData.AppNotifier.add(data);
+    } on Exception {
+      print('''
+=============================================================
+               ${Exception}
+=============================================================
+''');
+    }
   }
 
 }

@@ -21,6 +21,7 @@ class _MyAppState extends State<MyApp>  with WidgetsBindingObserver{
   bool _isLoading = true;
   SongDatabase songDatabase;
   MusicService Player;
+  Key key = new UniqueKey();
 var status;
   @override
   void initState() {
@@ -29,11 +30,19 @@ var status;
 
   }
 
+  void restartApp() {
+    this.setState(() {
+      key = new UniqueKey();
+      initPlatformState();
+    });
+  }
+
   @override
   void dispose() {
-    super.dispose();
     songData.audioPlayer.stop();
-    hide();
+    songData.AppNotifier.add("hideMedia");
+    print("########## GOING TO DISPOSE OF THE APP ###############");
+    super.dispose();
   }
 
 
@@ -110,6 +119,8 @@ var status;
 
 
 
+
+
     // If the widget was removed from the tree while the asynchronous platform
     // message was in flight, we want to discard the reply rather than calling
     // setState to update our non-existent appearance.
@@ -118,6 +129,11 @@ var status;
     setState(() {
       songData = new SongData(songDatabase,songs);
       _isLoading = false;
+      songData.AppNotifier.stream.listen((data){
+        if(data=="refreshPage"){
+          restartApp();
+        }
+      });
     });
     /*Player = MusicService(songData.audioPlayer, songData);
     WidgetsBinding.instance.addObserver(
@@ -126,14 +142,17 @@ var status;
             suspendingCallBack: hide()
         )
     );*/
+
   }
 
   @override
   Widget build(BuildContext context) {
-
-    return new MPInheritedWidget(songData, _isLoading, new RootPage(),songDatabase);
-
+    return new Container(
+      key: key,
+      child:new MPInheritedWidget(songData, _isLoading, new RootPage(),songDatabase) ,
+    );
   }
+
 
 
 
